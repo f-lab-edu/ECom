@@ -52,3 +52,11 @@ Thumbs.db
 *.zip
 *.jar
 *.war
+
+# MySQL 데이터 파일 무시
+db/
+db/*
+
+# Redis 데이터 파일 무시
+redis/
+redis/*

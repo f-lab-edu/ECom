@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: ecom
+
+
+---
+
+spring:
+    profiles:
+        active: api-local
+        group:
+          api-local:
+            - api-local
+            - core-local
+            - core
+
+---

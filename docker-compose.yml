@@ -1,0 +1,24 @@
+# Docker Compose of mysql service for local development
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ecom_db_container
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ecom_root_password
+      MYSQL_DATABASE: ecom_db
+      MYSQL_USER: ecom_user
+      MYSQL_PASSWORD: ecom_password
+  redis:
+    image: redis:latest
+    container_name: ecom_redis_container
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis:/data
+      - ./redis/conf/redis.conf:/usr/local/conf/redis.conf
+    command: redis-server /usr/local/conf/redis.conf
