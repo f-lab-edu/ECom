@@ -1,6 +1,7 @@
-package com.example.core.config.security;
+package com.example.api.core.config;
 
 import com.example.core.config.exception.CustomAuthenticationEntryPoint;
+import com.example.core.config.security.AuthenticationManagerConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

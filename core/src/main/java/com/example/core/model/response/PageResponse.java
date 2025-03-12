@@ -1,4 +1,4 @@
-package fan.graphic.core.model.response;
+package com.example.core.model.response;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageResponse<T> extends BaseResponse {
-    private static final long serialVersionUID = 4178196882193337906L;
 
     private List<T> list;
 

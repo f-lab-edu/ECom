@@ -1,4 +1,4 @@
-package fan.graphic.core.exception;
+package com.example.core.exception;
 
 import lombok.Getter;
 import lombok.Setter;
