@@ -66,6 +66,7 @@ application.properties
 application-*.properties
 .env
 
+
 # Java
 *.class
 
