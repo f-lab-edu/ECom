@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Getter
 @Builder
 @ToString
-public class LoginRes implements Serializable {
+public class AuthRes implements Serializable {
 
     private String accessToken;
 
