@@ -1,4 +1,4 @@
-package com.example.api.module.auth.account.controller.request;
+package com.example.api.module.auth.controller.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;

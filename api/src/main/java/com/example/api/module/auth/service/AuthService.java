@@ -1,0 +1,117 @@
+package com.example.api.module.auth.service;
+
+import com.example.api.module.auth.controller.request.LoginReqBody;
+import com.example.api.module.auth.controller.request.SignupReqBody;
+import com.example.core.config.exception.JwtExceptionCode;
+import com.example.core.domain.cart.Cart;
+import com.example.core.domain.cart.api.CartApiRepository;
+import com.example.core.domain.user.User;
+import com.example.core.domain.user.api.UserApiRepository;
+import com.example.core.domain.user.meta.Status;
+import com.example.core.exception.BadRequestException;
+import com.example.core.model.AuthRes;
+import com.example.core.utils.JwtUtil;
+import com.example.core.utils.SaltedHashUtil;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Optional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserApiRepository userApiRepository;
+    private final CartApiRepository cartApiRepository;
+
+    private final JwtUtil jwtUtil;
+    private final SaltedHashUtil saltedHashUtil;
+
+    @Transactional
+    public AuthRes signup(SignupReqBody body) {
+        if (userApiRepository.existsUserByEmail(body.getEmail())) {
+            throw new BadRequestException("Email already exists");
+        }
+
+        String salt = saltedHashUtil.generateSalt();
+        String hashedPassword = saltedHashUtil.hashPassword(body.getPassword(), salt);
+
+        User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber());
+
+        userApiRepository.save(user);
+        cartApiRepository.save(Cart.of(user.getId()));
+
+        return createLoginRes(user);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthRes login(LoginReqBody body) {
+        Optional<User> userOptional = userApiRepository.findByEmail(body.getEmail());
+
+        // if user not found
+        if (userOptional.isEmpty()) {
+            throw new BadRequestException("User not found");
+        }
+
+
+        // if user is not active
+        if (userOptional.get().getStatus() != Status.ACTIVE) {
+            throw new BadRequestException(String.valueOf(userOptional.get().getStatus()));
+        }
+
+
+        // if password is incorrect
+        if (!saltedHashUtil.verifyPassword(body.getPassword(), userOptional.get().getSalt(), userOptional.get().getHashedPassword())) {
+            throw new BadRequestException("Password is incorrect");
+        }
+        return createLoginRes(userOptional.get());
+    }
+
+
+
+    @Transactional
+    public AuthRes refreshToken(HttpServletRequest requst) {
+        String refreshToken = requst.getHeader("Authorization");
+
+        // 토큰이 잘못된 경우
+        if (!jwtUtil.validateRefreshToken(refreshToken)) {
+            throw new BadCredentialsException(JwtExceptionCode.INVALID_TOKEN.getMessage());
+        }
+
+        Claims claims = jwtUtil.extractRefreshClaims(refreshToken);
+        // 토큰 타입이 refresh가 아닌 경우
+        if (!claims.get("type", String.class).equals("refresh")) {
+            throw new BadCredentialsException(JwtExceptionCode.WRONG_TOKEN_TYPE.getMessage());
+        }
+
+        // Todo: Redis에 저장된 토큰과 일치하지 않거나 만료되어 삭제된 경우
+
+        // user가 존재하지 않는 경우
+        Optional<User> userOptional = userApiRepository.findById(claims.get("userId", Long.class));
+        if (userOptional.isEmpty()) {
+            throw new BadRequestException("User not found");
+        }
+
+        return createLoginRes(userOptional.get());
+    }
+
+    @Transactional
+    public AuthRes createLoginRes(User user) {
+        String accessToken = jwtUtil.createAccessToken(user.getId(), user.getEmail(), new ArrayList<>());
+        String refreshToken = jwtUtil.createRefreshToken(user.getId(), user.getEmail(), new ArrayList<>());
+
+        userApiRepository.save(user);
+
+        return AuthRes.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+}
