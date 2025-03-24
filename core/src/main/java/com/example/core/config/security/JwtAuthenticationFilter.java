@@ -2,6 +2,7 @@ package com.example.core.config.security;
 
 import com.example.core.config.exception.JwtExceptionCode;
 import com.example.core.utils.JwtUtil;
+import com.example.core.utils.MessageUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -26,35 +27,38 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final MessageUtil messageUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String token = extractAccessToken(request);
+        if (!StringUtils.hasText(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
-            if (jwtUtil.validateAccessToken(token)) {
-                Claims claims = jwtUtil.extractAccessClaims(token);
+            Claims claims = jwtUtil.extractAccessClaims(token);
 
-                String username = claims.getSubject();
-                List<String> roles = claims.get("roles", List.class);
+            String username = claims.getSubject();
+            List<String> roles = claims.get("roles", List.class);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                username,
-                                null,
-                                roles.stream().map(SimpleGrantedAuthority::new).toList()
-                        );
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            roles.stream().map(SimpleGrantedAuthority::new).toList()
+                    );
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token", e);
-            throw new BadCredentialsException(JwtExceptionCode.EXPIRED_TOKEN.getMessage());
+            throw new BadCredentialsException(messageUtil.getMessage("jwt.EXPIRED_TOKEN"));
         } catch (UnsupportedJwtException | IllegalArgumentException e) {
             log.error("Invalid JWT token", e);
-            throw new BadCredentialsException(JwtExceptionCode.INVALID_TOKEN.getMessage());
+            throw new BadCredentialsException(messageUtil.getMessage("jwt.INVALID_TOKEN"));
         }
 
         filterChain.doFilter(request, response);
