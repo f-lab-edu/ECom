@@ -26,4 +26,12 @@ public class ExceptionResponse {
                 .message(exception.getMessage())
                 .build();
     }
+
+    public static ExceptionResponse of(String message) {
+        return ExceptionResponse.builder()
+                .stage(ResponseErrorCode.ErrorStage.ERROR)
+                .code(-1)
+                .message(message)
+                .build();
+    }
 }
