@@ -17,14 +17,13 @@ import java.time.LocalDate;
 public class BaseResponse implements Serializable {
 
     @Builder.Default
-    private String dateTiime = LocalDate.now().toString();
+    private String dateTime = LocalDate.now().toString();
 
     @Builder.Default
     private ResponseStatus status = new ResponseStatus();
 
     public static BaseResponse of() {
-        BaseResponse successResponse = new BaseResponse();
-        return successResponse;
+        return new BaseResponse();
     }
 
     public static BaseResponse of(ResponseCode responseCode) {
