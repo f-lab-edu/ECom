@@ -3,6 +3,7 @@ package com.example.api.core.config;
 import com.example.core.config.security.CustomAuthenticationEntryPoint;
 import com.example.core.config.security.JwtAuthenticationFilter;
 import com.example.core.utils.JwtUtil;
+import com.example.core.utils.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final MessageUtil messageUtil;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
@@ -51,7 +53,7 @@ public class SecurityConfig {
                 )
 
                 // JWT 인증 필터 추가
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, messageUtil), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
