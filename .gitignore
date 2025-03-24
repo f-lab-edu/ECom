@@ -6,7 +6,10 @@ HELP.md
 **/build/
 core/build/
 api/build/
+admin/build/
 !gradle/wrapper/gradle-wrapper.jar
+/build/
+!build.gradle   # Gradle 설정 파일은 유지
 
 ### STS ###
 .apt_generated
@@ -65,15 +68,3 @@ application-*.yml
 application.properties
 application-*.properties
 .env
-
-
-# Java
-*.class
-
-# 빌드 관련 파일 무시
-/build/
-**/build/
-core/build/
-api/build/
-.gradle/
-!build.gradle   # Gradle 설정 파일은 유지

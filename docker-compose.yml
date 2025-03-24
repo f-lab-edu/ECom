@@ -1,4 +1,5 @@
 # Docker Compose of mysql service for local development
+version: "3.8"
 
 services:
   db:
@@ -22,3 +23,8 @@ services:
       - ./redis:/data
       - ./redis/conf/redis.conf:/usr/local/conf/redis.conf
     command: redis-server /usr/local/conf/redis.conf
+
+
+volumes:
+  mysql_data:
+  redis_data:
