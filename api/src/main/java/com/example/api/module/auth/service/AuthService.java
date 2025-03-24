@@ -52,7 +52,7 @@ public class AuthService {
         return createLoginRes(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequestBody body) {
         Optional<User> userOptional = userApiRepository.findByEmail(body.getEmail());
 
