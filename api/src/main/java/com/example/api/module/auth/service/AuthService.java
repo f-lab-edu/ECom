@@ -1,7 +1,7 @@
 package com.example.api.module.auth.service;
 
-import com.example.api.module.auth.controller.request.LoginReqBody;
-import com.example.api.module.auth.controller.request.SignupReqBody;
+import com.example.api.module.auth.controller.request.LoginRequestBody;
+import com.example.api.module.auth.controller.request.SignupRequestBody;
 import com.example.core.config.exception.JwtExceptionCode;
 import com.example.core.domain.cart.Cart;
 import com.example.core.domain.cart.api.CartApiRepository;
@@ -9,7 +9,7 @@ import com.example.core.domain.user.User;
 import com.example.core.domain.user.api.UserApiRepository;
 import com.example.core.domain.user.meta.Status;
 import com.example.core.exception.BadRequestException;
-import com.example.core.model.AuthRes;
+import com.example.core.model.AuthResponse;
 import com.example.core.utils.JwtUtil;
 import com.example.core.utils.SaltedHashUtil;
 import io.jsonwebtoken.Claims;
@@ -35,7 +35,7 @@ public class AuthService {
     private final SaltedHashUtil saltedHashUtil;
 
     @Transactional
-    public AuthRes signup(SignupReqBody body) {
+    public AuthResponse signup(SignupRequestBody body) {
         if (userApiRepository.existsUserByEmail(body.getEmail())) {
             throw new BadRequestException("Email already exists");
         }
@@ -52,7 +52,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthRes login(LoginReqBody body) {
+    public AuthResponse login(LoginRequestBody body) {
         Optional<User> userOptional = userApiRepository.findByEmail(body.getEmail());
 
         // if user not found
@@ -77,7 +77,7 @@ public class AuthService {
 
 
     @Transactional
-    public AuthRes refreshToken(HttpServletRequest requst) {
+    public AuthResponse refreshToken(HttpServletRequest requst) {
         String refreshToken = requst.getHeader("Authorization");
 
         // 토큰이 잘못된 경우
@@ -103,13 +103,13 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthRes createLoginRes(User user) {
+    public AuthResponse createLoginRes(User user) {
         String accessToken = jwtUtil.createAccessToken(user.getId(), user.getEmail(), new ArrayList<>());
         String refreshToken = jwtUtil.createRefreshToken(user.getId(), user.getEmail(), new ArrayList<>());
 
         userApiRepository.save(user);
 
-        return AuthRes.builder()
+        return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class SignupReqBody {
+public class SignupRequestBody {
 
     //email, nickname, password, phoneNumber
 
