@@ -1,6 +1,5 @@
 package com.example.core.config.security;
 
-import com.example.core.config.exception.JwtExceptionCode;
 import com.example.core.utils.JwtUtil;
 import com.example.core.utils.MessageUtil;
 import io.jsonwebtoken.Claims;
@@ -12,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,7 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String token = extractAccessToken(request);
+        // refresh token 요청은 필터링 하지 않음
+        if (request.getRequestURI().equals("/api/v1/auth/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = jwtUtil.extractAccessTokenFromCookie(request);
         if (!StringUtils.hasText(token)) {
             filterChain.doFilter(request, response);
             return;
@@ -41,21 +47,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             Claims claims = jwtUtil.extractAccessClaims(token);
+            if (!claims.get("type", String.class).equals("access") ||
+                    !jwtUtil.validateAccessToken(token)) {
+                throw new BadCredentialsException(messageUtil.getMessage("jwt.INVALID_TOKEN"));
+            }
 
-            String username = claims.getSubject();
+            Long userId = claims.get("userId", Long.class);
             List<String> roles = claims.get("roles", List.class);
+            List<SimpleGrantedAuthority> authorities = roles.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList();
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            roles.stream().map(SimpleGrantedAuthority::new).toList()
-                    );
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userId,
+                    null,
+                    authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // access token 만료 시
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token", e);
             throw new BadCredentialsException(messageUtil.getMessage("jwt.EXPIRED_TOKEN"));
+        // access token 유효하지 않음
         } catch (UnsupportedJwtException | IllegalArgumentException e) {
             log.error("Invalid JWT token", e);
             throw new BadCredentialsException(messageUtil.getMessage("jwt.INVALID_TOKEN"));
@@ -63,13 +77,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
-    // 토큰 추출
-    // accessToken 또는 null 반환
-    private String extractAccessToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        return (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) ?
-                bearerToken.substring(7) : null;
-    }
-
 }
