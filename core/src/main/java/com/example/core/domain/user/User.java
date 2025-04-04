@@ -44,18 +44,18 @@ public class User extends BaseEntity {
     @Column
     private Status status;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     private List<ShippingAddress> shippingAddressList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user")
     private Cart cart;
 
 
-    public static User of(@NonNull String email,
-                          @NonNull String nickname,
-                          @NonNull String salt,
-                          @NonNull String hashedPassword,
-                          @NonNull String phoneNumber) {
+    public static User of(String email,
+                          String nickname,
+                          String salt,
+                          String hashedPassword,
+                          String phoneNumber) {
         return User.builder()
                    .email(email)
                    .nickname(nickname)
