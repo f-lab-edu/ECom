@@ -6,6 +6,7 @@ import com.example.api.module.auth.service.AuthService;
 import com.example.core.model.AuthResponse;
 import com.example.core.model.response.DataResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -25,12 +26,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public DataResponse<AuthResponse> emailLogin(@Valid @RequestBody LoginRequestBody body) {
-        return DataResponse.of(authService.login(body));
+    public DataResponse<AuthResponse> emailLogin(@Valid @RequestBody LoginRequestBody body,
+                                           HttpServletResponse response) {
+        return DataResponse.of(authService.login(response, body));
     }
 
     @PostMapping("/refresh")
-    public DataResponse<AuthResponse> refreshToken(HttpServletRequest request) {
-        return DataResponse.of(authService.refreshToken(request));
+    public DataResponse<AuthResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        return DataResponse.of(authService.refreshToken(request, response));
     }
 }
