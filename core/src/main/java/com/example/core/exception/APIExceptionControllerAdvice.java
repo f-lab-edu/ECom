@@ -22,7 +22,6 @@ public class APIExceptionControllerAdvice {
 
     private MessageUtil messageUtil;
 
-    // todo: create log
     private void createLog(HttpServletRequest request, Exception exception) {
 
     }
