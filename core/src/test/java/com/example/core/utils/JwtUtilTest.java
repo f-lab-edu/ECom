@@ -43,7 +43,7 @@ class JwtUtilTest {
     @Test
     public void createAccessToken_AND_extractAccessClaim_Test() {
         //Given
-        String accessToken = jwtUtil.createAccessToken(userId, userEmail, roles);
+        String accessToken = jwtUtil.createAccessToken(userId, roles);
 
         //When
         Claims claims = jwtUtil.extractAccessClaims(accessToken);
@@ -58,7 +58,7 @@ class JwtUtilTest {
     @Test
     public void createRefreshToken_AND_extractRefreshClaim_Test() {
         //Given
-        String refreshToken = jwtUtil.createRefreshToken(userId, userEmail, roles);
+        String refreshToken = jwtUtil.createRefreshToken(userId, roles);
 
         //When
         Claims claims = jwtUtil.extractRefreshClaims(refreshToken);
@@ -73,7 +73,7 @@ class JwtUtilTest {
     @Test
     public void validateAccessTokenTest_SUCCESS() {
         //Given
-        String accessToken = jwtUtil.createAccessToken(userId, userEmail, roles);
+        String accessToken = jwtUtil.createAccessToken(userId, roles);
 
         //When
         boolean result = jwtUtil.validateAccessToken(accessToken);
@@ -85,7 +85,7 @@ class JwtUtilTest {
     @Test
     public void validateAccessTokenTest_FAIL() {
         //Given
-        String accessToken = jwtUtil.createAccessToken(userId, userEmail, roles) + "a";
+        String accessToken = jwtUtil.createAccessToken(userId, roles) + "a";
 
         //When
         boolean result = jwtUtil.validateAccessToken(accessToken);
@@ -97,7 +97,7 @@ class JwtUtilTest {
     @Test
     public void validateRefreshTokenTest_SUCCESS() {
         //Given
-        String refreshToken = jwtUtil.createRefreshToken(userId, userEmail, roles);
+        String refreshToken = jwtUtil.createRefreshToken(userId, roles);
 
         //When
         boolean result = jwtUtil.validateRefreshToken(refreshToken);
@@ -109,7 +109,7 @@ class JwtUtilTest {
     @Test
     public void validateRefreshTokenTest_FAIL() {
         //Given
-        String refreshToken = jwtUtil.createRefreshToken(userId, userEmail, roles) + "a";
+        String refreshToken = jwtUtil.createRefreshToken(userId, roles) + "a";
 
         //When
         boolean result = jwtUtil.validateRefreshToken(refreshToken);

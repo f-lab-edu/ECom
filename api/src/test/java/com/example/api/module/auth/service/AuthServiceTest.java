@@ -7,10 +7,13 @@ import com.example.core.domain.user.api.UserApiRepository;
 import com.example.core.domain.user.meta.Status;
 import com.example.core.exception.BadRequestException;
 import com.example.core.model.AuthResponse;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,23 +78,32 @@ class AuthServiceTest {
         // given
         SignupRequestBody signupRequestBody = new SignupRequestBody();
         signupRequestBody.setEmail(email);
-        signupRequestBody.setNickname(nickname);
         signupRequestBody.setPassword(password);
         signupRequestBody.setPhoneNumber(phoneNumber);
+        signupRequestBody.setNickname(nickname);
         authService.signup(signupRequestBody);
 
         LoginRequestBody loginRequestBody = new LoginRequestBody();
         loginRequestBody.setEmail(email);
         loginRequestBody.setPassword(password);
 
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
         // when
-        AuthResponse authResponse = authService.login(loginRequestBody);
+        AuthResponse authResponse = authService.login(response, loginRequestBody);
 
 
         // then
-        assertNotNull(authResponse.getAccessToken());
-        assertNotNull(authResponse.getRefreshToken());
+        assertEquals(authResponse.getUserEmail(), email);
+        assertEquals(authResponse.getUserNickname(), nickname);
+        assertEquals(authResponse.getUserStatus(), Status.ACTIVE);
+
+        Cookie accessCookie = response.getCookie("accessToken");
+        Cookie refreshCookie = response.getCookie("refreshToken");
+        assertNotNull(accessCookie);
+        assertNotNull(refreshCookie);
+        assertEquals("accessToken", accessCookie.getName());
+        assertEquals("refreshToken", refreshCookie.getName());
     }
 
     @Test
@@ -101,10 +113,12 @@ class AuthServiceTest {
         loginRequestBody.setEmail(email);
         loginRequestBody.setPassword(password);
 
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
         // when
 
         // then
-        assertThrows(BadRequestException.class, () -> authService.login(loginRequestBody));
+        assertThrows(BadRequestException.class, () -> authService.login(response, loginRequestBody));
     }
 
     @Test
@@ -117,10 +131,10 @@ class AuthServiceTest {
         signupRequestBody.setPhoneNumber(phoneNumber);
         authService.signup(signupRequestBody);
 
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
         User user = userApiRepository.findByEmail(email).orElseThrow();
         user.setStatus(Status.BANNED);
-//        user.setStatus(Status.SUSPENDED);
-//        user.setStatus(Status.WITHDRAWN);
         userApiRepository.save(user);
 
         LoginRequestBody loginRequestBody = new LoginRequestBody();
@@ -129,7 +143,7 @@ class AuthServiceTest {
         // when
 
         // then
-        assertThrows(BadRequestException.class, () -> authService.login(loginRequestBody));
+        assertThrows(BadRequestException.class, () -> authService.login(response, loginRequestBody));
     }
 
     @Test
@@ -142,6 +156,7 @@ class AuthServiceTest {
         signupRequestBody.setPhoneNumber(phoneNumber);
         authService.signup(signupRequestBody);
 
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
         LoginRequestBody loginRequestBody = new LoginRequestBody();
         loginRequestBody.setEmail(email);
@@ -150,6 +165,6 @@ class AuthServiceTest {
         // when
 
         // then
-        assertThrows(BadRequestException.class, () -> authService.login(loginRequestBody));
+        assertThrows(BadRequestException.class, () -> authService.login(response,loginRequestBody));
     }
 }
