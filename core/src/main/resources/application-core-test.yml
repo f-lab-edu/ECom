@@ -14,11 +14,11 @@ spring:
 
 jwt:
   token:
-    expire-second: 43200
+    access:
+      expire-second: 43200
+      access-secret: b37d47c4b8aeb3f4ff7e0155f36c4483a224f99861f60aa745abcc1dd4a81484
     refresh:
       expire-second: 2592000
       renewal-interval-second: 50400
-
-#  https://jwtsecret.com/generate
-  secretKey: b37d47c4b8aeb3f4ff7e0155f36c4483a224f99861f60aa745abcc1dd4a81484
-  refreshKey: 46d3bfb7703995bad17525464c2fdd1324ab86cda2b7b836eb0f05dbb5aef970
+      refresh-secret: 46d3bfb7703995bad17525464c2fdd1324ab86cda2b7b836eb0f05dbb5aef970
+#  https://jwtsecret.com/generate464c2fdd1324ab86cda2b7b836eb0f05dbb5aef970

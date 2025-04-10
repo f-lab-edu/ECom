@@ -1,16 +1,19 @@
-package com.example.core.config.security;
+package com.example.api.core.config;
 
-import com.example.core.config.exception.CustomAuthenticationEntryPoint;
+import com.example.core.config.security.CustomAuthenticationEntryPoint;
+import com.example.core.config.security.JwtAuthenticationFilter;
+import com.example.core.utils.JwtUtil;
+import com.example.core.utils.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
@@ -22,7 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationManagerConfig authenticationManagerConfig;
+    private final JwtUtil jwtUtil;
+    private final MessageUtil messageUtil;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
@@ -31,21 +35,25 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // /signyp, /loginm /users/refresh 경로는 인증 없이 접근 가능하도록 설정
-                // /admin/** 경로는 ADMIN 권한을 가진 사용자만 접근 가능하도록 설정
-                // 나머지는 로그인된 사용자만 접근 가능하도록 설정
+                // /signyp, /loginm /refresh 경로는 인증 없이 접근 가능하도록 설정
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers("/signup", "/login", "/users/refresh").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        //v1
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(exception -> exception
+
+                // 인증 실패 시 처리
+                .exceptionHandling(e -> e
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
+
+                // JWT 인증 필터 추가
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, messageUtil), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -1,9 +1,15 @@
 HELP.md
 .gradle
-build/
+
+# Gradle 관련
+.gradle/
+**/build/
+core/build/
+api/build/
+admin/build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+/build/
+!build.gradle   # Gradle 설정 파일은 유지
 
 ### STS ###
 .apt_generated
@@ -14,8 +20,6 @@ build/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
 .idea
@@ -23,8 +27,6 @@ bin/
 *.iml
 *.ipr
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -35,10 +37,6 @@ out/
 
 ### VS Code ###
 .vscode/
-
-# Gradle 관련
-.gradle/
-build/
 
 # IntelliJ 관련
 .idea/
@@ -60,3 +58,13 @@ db/*
 # Redis 데이터 파일 무시
 redis/
 redis/*
+
+# .class 파일 무시 (컴파일된 Java 파일)
+*.class
+
+# 환경 파일
+application.yml
+application-*.yml
+application.properties
+application-*.properties
+.env
