@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -94,9 +93,9 @@ class AuthServiceTest {
 
 
         // then
-        assertEquals(authResponse.getUserEmail(), email);
-        assertEquals(authResponse.getUserNickname(), nickname);
-        assertEquals(authResponse.getUserStatus(), Status.ACTIVE);
+        assertEquals(authResponse.getEmail(), email);
+        assertEquals(authResponse.getNickname(), nickname);
+        assertEquals(authResponse.getStatus(), Status.ACTIVE);
 
         Cookie accessCookie = response.getCookie("accessToken");
         Cookie refreshCookie = response.getCookie("refreshToken");
