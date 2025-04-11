@@ -42,7 +42,8 @@ public class Admin extends BaseEntity {
     @Column
     private Status status;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
+    @JoinColumn(name = "admin_id")
     private List<AdminRole> adminRoles;
 
 
