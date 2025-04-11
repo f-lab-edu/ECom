@@ -26,7 +26,8 @@ public class Role extends BaseEntity {
     @Column
     private String description;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
+    @JoinColumn(name = "role_id")
     private List<RolePermission> rolePermissions;
 
     public Role(String description) {
