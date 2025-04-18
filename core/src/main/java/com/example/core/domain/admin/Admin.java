@@ -42,8 +42,7 @@ public class Admin extends BaseEntity {
     @Column
     private Status status;
 
-    @OneToMany
-    @JoinColumn(name = "admin_id")
+    @OneToMany(mappedBy = "admin")
     private List<AdminRole> adminRoles;
 
 
