@@ -4,12 +4,12 @@ import com.example.api.module.product.controller.request.ProductCreateRequest;
 import com.example.api.module.product.controller.request.ProductUpdateRequest;
 import com.example.api.module.product.controller.request.ProductSearchConditionRequest;
 import com.example.api.module.product.controller.response.ImageUploadResponse;
-import com.example.api.module.product.controller.response.ProductSearchResponse;
+import com.example.api.module.product.controller.response.ProductResponse;
+import com.example.api.module.product.controller.response.ProductsSearchResponse;
 import com.example.api.module.product.service.ProductService;
 import com.example.core.model.response.DataResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,8 +23,13 @@ public class ProductController {
 
     //GET /api/v1/products?categoryId={categoryId}&minPrice={minprice}&maxPrice={maxprice}&sort={sortType},{sortBy}&page={page}&size={size}
     @GetMapping()
-    public DataResponse<Page<ProductSearchResponse>> getProducts(@ModelAttribute ProductSearchConditionRequest condition) {
+    public DataResponse<Page<ProductsSearchResponse>> getProducts(@ModelAttribute ProductSearchConditionRequest condition) {
         return DataResponse.of(productService.getProducts(condition));
+    }
+
+    @GetMapping("/{productId}")
+    public DataResponse<ProductResponse> getProduct(@PathVariable Long productId) {
+        return DataResponse.of(productService.getProduct(productId));
     }
 
 //    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")

@@ -10,15 +10,15 @@ import lombok.ToString;
 @Getter
 @Builder
 @ToString
-public class ProductSearchResponse {
+public class ProductsSearchResponse {
     private Long id;
     private String productName;
     private Long price;
     private String thumbnailUrl;
     private String categoryName;
 
-    public static ProductSearchResponse from(ProductSearchDto productSearchDto) {
-        return ProductSearchResponse.builder()
+    public static ProductsSearchResponse from(ProductSearchDto productSearchDto) {
+        return ProductsSearchResponse.builder()
                 .id(productSearchDto.getId())
                 .productName(productSearchDto.getProductName())
                 .price(productSearchDto.getPrice())

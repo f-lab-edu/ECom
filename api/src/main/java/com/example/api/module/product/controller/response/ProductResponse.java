@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -20,9 +21,9 @@ public class ProductResponse {
     private Long price;
     private Long stockQuantity;
     private String categoryName;
-    private List<ProductImage> imageUrls;
+    private List<ProductImageResponse> images;
 
-    public static ProductResponse of(Product product) {
+    public static ProductResponse from(Product product) {
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getProductName())
@@ -30,7 +31,9 @@ public class ProductResponse {
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .categoryName(product.getCategory().getName())
-                .imageUrls(product.getProductImages())
+                .images(product.getProductImages().stream()
+                        .map(ProductImageResponse::from)
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

@@ -4,7 +4,8 @@ import com.example.api.module.product.controller.request.ProductCreateRequest;
 import com.example.api.module.product.controller.request.ProductSearchConditionRequest;
 import com.example.api.module.product.controller.request.ProductUpdateRequest;
 import com.example.api.module.product.controller.response.ImageUploadResponse;
-import com.example.api.module.product.controller.response.ProductSearchResponse;
+import com.example.api.module.product.controller.response.ProductResponse;
+import com.example.api.module.product.controller.response.ProductsSearchResponse;
 import com.example.core.domain.category.Category;
 import com.example.core.domain.category.api.CategoryApiRepository;
 import com.example.core.domain.product.Product;
@@ -36,10 +37,17 @@ public class ProductService {
     private final CategoryApiRepository categoryApiRepository;
 
     @Transactional(readOnly = true)
-    public Page<ProductSearchResponse> getProducts(ProductSearchConditionRequest condition) {
+    public Page<ProductsSearchResponse> getProducts(ProductSearchConditionRequest condition) {
         ProductSearchConditionDto requestConditionDto = ProductSearchConditionRequest.toDto(condition);
         return productApiRepository.search(requestConditionDto)
-                .map(ProductSearchResponse::from);
+                .map(ProductsSearchResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getProduct(Long productId) {
+        Product product = productApiRepository.findById(productId)
+                .orElseThrow(() -> new BadRequestException("Product not found"));
+        return ProductResponse.from(product);
     }
 
     @Transactional
