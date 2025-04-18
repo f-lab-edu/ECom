@@ -1,7 +1,6 @@
-package com.example.core.domain.cart;
+package com.example.core.domain.category;
 
 import com.example.core.domain.BaseEntity;
-import com.example.core.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @ToString
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class Cart extends BaseEntity {
+@AllArgsConstructor
+public class Category extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
+    private String name;
+
+    public static Category of(String name) {
+        return Category.builder()
+                .name(name)
+                .build();
+    }
 }
