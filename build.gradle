@@ -85,25 +85,5 @@ subprojects {
 
 		// 테스트용 H2
 		testImplementation 'com.h2database:h2'
-
-		// QueryDSL 공통
-		implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-		annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
-		annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-		annotationProcessor 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-
-		// Redis Cache
-		implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-		implementation 'org.springframework.boot:spring-boot-starter-cache'
-
-		// AWS SDK - S3
-		implementation platform('software.amazon.awssdk:bom:2.21.1') // 최신 BOM 사용
-		implementation 'com.amazonaws:aws-java-sdk-s3:1.12.693'
-		implementation 'commons-io:commons-io:2.15.0'
-
-
-
-		// 테스트용 H2
-		testImplementation 'com.h2database:h2'
 	}
 }
