@@ -22,7 +22,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PreAuthorize("hasRole('SUPER ADMIN')")
+//    @PreAuthorize("hasRole('SUPER ADMIN')")
     @PostMapping("/admins")
     public DataResponse<AuthResponse> createAdmin(@Valid @RequestBody SignupRequestBody body) {
         return DataResponse.of(authService.createAdmin(body));
