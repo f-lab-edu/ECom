@@ -5,7 +5,10 @@ import com.example.admin.module.auth.controller.request.SignupRequestBody;
 import com.example.core.domain.admin.Admin;
 import com.example.core.domain.admin.api.AdminApiRepository;
 import com.example.core.domain.admin.meta.Status;
+import com.example.core.domain.admin_to_role.AdminRole;
+import com.example.core.domain.admin_to_role.api.AdminRoleApiRepository;
 import com.example.core.domain.role.Role;
+import com.example.core.domain.role.api.RoleApiRepository;
 import com.example.core.exception.BadRequestException;
 import com.example.core.model.AuthResponse;
 import com.example.core.utils.JwtUtil;
@@ -29,6 +32,8 @@ import java.util.List;
 public class AuthService {
 
     private final AdminApiRepository adminApiRepository;
+    private final AdminRoleApiRepository adminRoleApiRepository;
+    private final RoleApiRepository roleApiRepository;
 
     private final JwtUtil jwtUtil;
     private final MessageUtil messageUtil;
@@ -43,8 +48,16 @@ public class AuthService {
         String salt = saltedHashUtil.generateSalt();
         String hashedPassword = saltedHashUtil.hashPassword(body.getPassword(), salt);
 
+        Role role = roleApiRepository.findByDescription("ROLE_ADMIN")
+                .orElseThrow(() -> new BadRequestException(messageUtil.getMessage("auth.role.NOTFOUND")));
+
         Admin admin = Admin.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber());
         adminApiRepository.save(admin);
+
+        AdminRole adminRole = new AdminRole();
+        adminRole.setAdmin(admin);
+        adminRole.setRole(role);
+        adminRoleApiRepository.save(adminRole);
 
         return AuthResponse.from(admin);
     }
