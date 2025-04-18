@@ -9,11 +9,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface AdminApiRepository extends JpaRepository<Admin, Long> {
+public interface AdminApiRepository extends JpaRepository<Admin, Long>, AdminApiRepositoryCustom{
     Optional<Admin> findByEmail(String email);
 
     boolean existsAdminByEmail(String email);
 
-    @Query("SELECT ar.role FROM AdminRole ar WHERE ar.admin.id = :adminId")
-    List<Role> findRolesByAdminId(@Param("adminId") Long adminId);
+
 }
