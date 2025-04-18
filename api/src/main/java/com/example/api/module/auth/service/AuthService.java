@@ -45,10 +45,10 @@ public class AuthService {
         String salt = saltedHashUtil.generateSalt();
         String hashedPassword = saltedHashUtil.hashPassword(body.getPassword(), salt);
 
-        User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber());
+        Cart cart = cartApiRepository.save(new Cart());
 
-        userApiRepository.save(user);
-        cartApiRepository.save(Cart.of(user.getId()));
+        User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber(), cart);
+        user = userApiRepository.save(user);
 
         return AuthResponse.from(user);
     }
