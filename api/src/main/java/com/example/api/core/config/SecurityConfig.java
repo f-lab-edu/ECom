@@ -42,9 +42,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
-                        //v1
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .anyRequest().authenticated()
+                        //test purpose only
+                        .requestMatchers("/**").permitAll()
+
+//                        .requestMatchers("/api/v1/auth/**").permitAll()
+//                        .anyRequest().authenticated()
                 )
 
                 // 인증 실패 시 처리
