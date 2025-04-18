@@ -2,6 +2,7 @@ package com.example.api.module.auth.service;
 
 import com.example.api.module.auth.controller.request.LoginRequestBody;
 import com.example.api.module.auth.controller.request.SignupRequestBody;
+import com.example.core.domain.cart.api.CartApiRepository;
 import com.example.core.domain.user.User;
 import com.example.core.domain.user.api.UserApiRepository;
 import com.example.core.domain.user.meta.Status;
@@ -12,14 +13,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("api-test")
+@ActiveProfiles({"api-test","core-test"})
 class AuthServiceTest {
 
     @Autowired
@@ -32,11 +32,14 @@ class AuthServiceTest {
     private String nickname = "abc";
     private String password = "Ab1!2345";
     private String phoneNumber = "010-1234-5678";
+    @Autowired
+    private CartApiRepository cartApiRepository;
 
 
     @BeforeEach
     void cleanup() {
         userApiRepository.deleteAll();
+        cartApiRepository.deleteAll();
     }
 
     @Test
@@ -94,9 +97,9 @@ class AuthServiceTest {
 
 
         // then
-        assertEquals(authResponse.getUserEmail(), email);
-        assertEquals(authResponse.getUserNickname(), nickname);
-        assertEquals(authResponse.getUserStatus(), Status.ACTIVE);
+        assertEquals(authResponse.getEmail(), email);
+        assertEquals(authResponse.getNickname(), nickname);
+        assertEquals(authResponse.getStatus(), "ACTIVE");
 
         Cookie accessCookie = response.getCookie("accessToken");
         Cookie refreshCookie = response.getCookie("refreshToken");

@@ -13,13 +13,13 @@ import java.util.List;
 
 @Slf4j
 @Entity
-@Table
 @Getter
 @Setter
 @ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "users")
 public class User extends BaseEntity {
 
     @Id
@@ -45,9 +45,10 @@ public class User extends BaseEntity {
     private Status status;
 
     @OneToMany(mappedBy = "user")
-    private List<ShippingAddress> shippingAddressList = new ArrayList<>();
+    private List<ShippingAddress> shippingAddressList;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne
+    @JoinColumn(name = "cart_id", nullable = false, unique = true)
     private Cart cart;
 
 
@@ -55,14 +56,16 @@ public class User extends BaseEntity {
                           String nickname,
                           String salt,
                           String hashedPassword,
-                          String phoneNumber) {
+                          String phoneNumber,
+                          Cart cart) {
         return User.builder()
-                   .email(email)
-                   .nickname(nickname)
-                   .salt(salt)
-                   .hashedPassword(hashedPassword)
-                   .phoneNumber(phoneNumber)
-                   .status(Status.ACTIVE)
-                   .build();
+                .email(email)
+                .nickname(nickname)
+                .salt(salt)
+                .hashedPassword(hashedPassword)
+                .phoneNumber(phoneNumber)
+                .status(Status.ACTIVE)
+                .cart(cart)
+                .build();
     }
 }
