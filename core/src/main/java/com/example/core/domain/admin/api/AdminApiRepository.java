@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface AdminApiRepository extends JpaRepository<Admin, Long>, AdminApiRepositoryCustom{
+public interface AdminApiRepository extends JpaRepository<Admin, Long> {
     Optional<Admin> findByEmail(String email);
 
 
