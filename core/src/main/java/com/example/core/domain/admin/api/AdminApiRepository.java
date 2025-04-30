@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface AdminApiRepository extends JpaRepository<Admin, Long> {
     Optional<Admin> findByEmail(String email);
 
-
+    List<Role> findRolesByAdminId(Long adminId);
 }
