@@ -22,22 +22,20 @@ public class MinioUtil {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    private final String PREFIX = "products/";
-
-    public ImageUploadDto upload(MultipartFile file) throws IOException {
+    public ImageUploadDto upload(MultipartFile file, String DOMAIN) throws IOException {
         String uuid = UUID.randomUUID().toString();
-        String extention = FilenameUtils.getExtension(file.getOriginalFilename());
-        String key = PREFIX + uuid + "." + extention;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String key = DOMAIN + "/" + uuid + "." + extension;
 
         ObjectMetadata meta = new ObjectMetadata();
         meta.setContentLength(file.getSize());
         meta.setContentType(file.getContentType());
 
         s3.putObject(bucket, key, file.getInputStream(), meta);
-        System.out.println("upload success key: " + key);
-
         String url = s3.getUrl(bucket, key).toString();
-        return new ImageUploadDto(uuid, key, url);
+
+        System.out.println("upload success url: " + url);
+        return new ImageUploadDto(uuid, url);
     }
 
     public void delete(String key) {
