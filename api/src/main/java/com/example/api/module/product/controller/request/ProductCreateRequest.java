@@ -1,6 +1,9 @@
 package com.example.api.module.product.controller.request;
 
+import com.example.core.dto.ProductImageDto;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ProductCreateRequest {
@@ -9,12 +12,5 @@ public class ProductCreateRequest {
     private Long price;
     private Long stockQuantity;
     private Long categoryId;
-
-    private String[] imageIds;
-    private String[] imageUrls;
-    private String[] imageKeys;
-    private Boolean[] isThumbnail;
-    private int[] imageSortOrder;
-
-
+    private List<ProductImageDto> productImages;
 }
