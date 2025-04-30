@@ -2,10 +2,13 @@ package com.example.core.domain.product_image;
 
 import com.example.core.domain.BaseEntity;
 import com.example.core.domain.product.Product;
+import com.example.core.dto.ProductImageDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -24,9 +27,6 @@ public class ProductImage extends BaseEntity {
     private String id = UUID.randomUUID().toString();
 
     @Column
-    private String imageKey;
-
-    @Column
     private String imageUrl;
 
     @ManyToOne
@@ -39,4 +39,17 @@ public class ProductImage extends BaseEntity {
     @Column
     private Boolean isThumbnail;
 
+    public static List<ProductImage> from(List<ProductImageDto> productImageDtos, Product product) {
+        List<ProductImage> productImages = new ArrayList<>();
+        for (ProductImageDto dto : productImageDtos) {
+            productImages.add(ProductImage.builder()
+                    .imageUrl(dto.getUrl())
+                    .product(product)
+                    .sortOrder(dto.getImageSortOrder())
+                    .isThumbnail(dto.isThumbnail())
+                    .build());
+        }
+        return productImages;
+
+    }
 }

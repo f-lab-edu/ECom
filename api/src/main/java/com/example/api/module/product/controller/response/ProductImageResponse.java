@@ -12,7 +12,6 @@ import lombok.ToString;
 @ToString
 public class ProductImageResponse {
     private String id;
-    private String imageKey;
     private String imageUrl;
 
     private Boolean isThumbnail;
@@ -22,7 +21,6 @@ public class ProductImageResponse {
     public static ProductImageResponse from(ProductImage productImage) {
         return ProductImageResponse.builder()
                 .id(productImage.getId())
-                .imageKey(productImage.getImageKey())
                 .imageUrl(productImage.getImageUrl())
                 .isThumbnail(productImage.getIsThumbnail())
                 .sortOrder(productImage.getSortOrder())

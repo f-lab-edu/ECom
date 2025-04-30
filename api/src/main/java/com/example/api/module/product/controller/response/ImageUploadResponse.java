@@ -12,13 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ImageUploadResponse {
     String imageId;
-    String key;
     String url;
 
     public static ImageUploadResponse from(ImageUploadDto dto) {
         return ImageUploadResponse.builder()
                 .imageId(dto.getImageId())
-                .key(dto.getKey())
                 .url(dto.getUrl())
                 .build();
     }

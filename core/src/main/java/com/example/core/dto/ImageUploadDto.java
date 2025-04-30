@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ImageUploadDto {
     String imageId; // UUID = DB id
-    String key; // s3 key. 삭제시 사용됨
     String url;
 }
