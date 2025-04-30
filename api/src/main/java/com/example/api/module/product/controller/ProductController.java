@@ -28,7 +28,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public DataResponse<ProductResponse> getProduct(@PathVariable Long productId) {
+    public DataResponse<ProductResponse> getProduct(@PathVariable("productId") Long productId) {
         return DataResponse.of(productService.getProduct(productId));
     }
 
