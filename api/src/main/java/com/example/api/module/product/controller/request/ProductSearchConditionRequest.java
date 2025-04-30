@@ -14,7 +14,7 @@ public class ProductSearchConditionRequest {
 
     private String sort = "price, asc";
 
-    private Long categoryId = 0L;
+    private Long categoryId = null;
 
 
     public static ProductSearchConditionDto toDto(ProductSearchConditionRequest condition) {
