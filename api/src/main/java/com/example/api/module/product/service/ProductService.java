@@ -12,6 +12,7 @@ import com.example.core.domain.product.Product;
 import com.example.core.domain.product.api.ProductApiRepository;
 import com.example.core.domain.product_image.ProductImage;
 import com.example.core.domain.product_image.api.ProductImageApiRepository;
+import com.example.core.dto.ProductImageDto;
 import com.example.core.dto.ProductSearchConditionDto;
 import com.example.core.exception.BadRequestException;
 import com.example.core.utils.MinioUtil;
@@ -53,13 +54,7 @@ public class ProductService {
     @Transactional
     public ImageUploadResponse uploadImage(MultipartFile file) {
         try {
-            ImageUploadResponse result = ImageUploadResponse.from(minioUtil.upload(file));
-            ProductImage productImage = ProductImage.builder()
-                    .id(result.getImageId())
-                    .imageUrl(result.getUrl())
-                    .imageKey(result.getKey())
-                    .build();
-            productImageApiRepository.save(productImage);
+            ImageUploadResponse result = ImageUploadResponse.from(minioUtil.upload(file, "products"));
             return result;
 
         } catch (Exception e) {
@@ -73,6 +68,7 @@ public class ProductService {
         Category category = categoryApiRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new BadRequestException("Category not found"));
 
+        // create product
         Product product = Product.builder()
                 .productName(request.getName())
                 .description(request.getDescription())
@@ -83,19 +79,12 @@ public class ProductService {
                 .build();
         productApiRepository.save(product);
 
-        List<ProductImage> images = productImageApiRepository.findAllById(
-                List.of(request.getImageIds()));
+        // create product images
+        List<ProductImageDto> images = request.getProductImages();
+        List<ProductImage> productImages = ProductImage.from(images, product);
+        productImageApiRepository.saveAll(productImages);
 
-
-        for (int i=0; i<images.size(); i++) {
-            ProductImage img = images.get(i);
-            img.setProduct(product);
-            img.setSortOrder(request.getImageSortOrder()[i]);
-            img.setIsThumbnail(request.getIsThumbnail()[i]);
-            product.getProductImages().add(img);
-        }
-
-        productImageApiRepository.saveAll(images);
+        product.setProductImages(productImages);
         productApiRepository.save(product);
         return product.getId();
     }
