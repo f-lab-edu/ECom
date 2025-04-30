@@ -43,7 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
                         //test purpose only
-                        .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers("/**").permitAll()
+//                        .requestMatchers("/admin/**").permitAll()
 
 //                        .requestMatchers("/admin/v1/auth/**").permitAll()
 //                        .anyRequest().authenticated()

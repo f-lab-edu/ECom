@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // /signyp, /loginm /refresh 경로는 인증 없이 접근 가능하도록 설정
+                // /signup, /login /refresh 경로는 인증 없이 접근 가능하도록 설정
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
