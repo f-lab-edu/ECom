@@ -3,6 +3,7 @@ package com.example.core.domain.product.api;
 import com.example.core.domain.product_image.QProductImage;
 import com.example.core.dto.ProductSearchConditionDto;
 import com.example.core.dto.ProductSearchDto;
+import com.example.core.exception.BadRequestException;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -27,70 +28,60 @@ public class ProductApiRepositoryImpl implements ProductApiRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<ProductSearchDto> search(ProductSearchConditionDto conditionDto) {
-        BooleanBuilder where = new BooleanBuilder();
-        where.and(isDeleted(false));
-        where.and(betweenPrice(conditionDto.getMinPrice(), conditionDto.getMaxPrice()));
-        where.and(categoryCondition(conditionDto.getCategoryId()));
-
-        Pageable pageable = PageRequest.of(conditionDto.getPage(), conditionDto.getSize());
-
-        QProductImage thumbnailImage = QProductImage.productImage;
-
-        List<ProductSearchDto> results = queryFactory
+    public List<ProductSearchDto> findProductsByCondition(ProductSearchConditionDto conditionDto) {
+        return queryFactory
                 .select(Projections.constructor(
                         ProductSearchDto.class,
                         product.id,
                         product.productName,
                         product.price,
-                        thumbnailImage.imageUrl,
+                        product.stockQuantity,
                         product.category.name
                 ))
                 .from(product)
-                .leftJoin(product.productImages, thumbnailImage)
-                    .on(thumbnailImage.isThumbnail.eq(true))
-                .where(where)
+                .where(buildWhere(conditionDto))
                 .orderBy(toOrderSpecifier(conditionDto.getSort()))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
                 .fetch();
+    }
 
-
-        long total = Optional.ofNullable(
+    @Override
+    public long countProductsByCondition(ProductSearchConditionDto conditionDto) {
+        return Optional.ofNullable(
                 queryFactory
                         .select(product.count())
                         .from(product)
-                        .where(where)
+                        .where(buildWhere(conditionDto))
                         .fetchOne())
                 .orElse(0L);
+    }
 
-        return new PageImpl<>(results, pageable, total);
+    private BooleanBuilder buildWhere(ProductSearchConditionDto conditionDto) {
+        BooleanBuilder where = new BooleanBuilder();
+        where.and(product.isDeleted.eq(false));
+        where.and(categoryCondition(conditionDto.getCategoryId()));
+        where.and(product.price.between(conditionDto.getMinPrice(), conditionDto.getMaxPrice()));
+        return where;
     }
 
     private OrderSpecifier<?> toOrderSpecifier(String sortParam) {
+        if (sortParam == null || sortParam.isEmpty()) {
+            return product.id.desc(); // Default sorting
+        }
+
         String[] parts = sortParam.split(",");
         String field = parts[0].trim();
         boolean asc = parts.length < 2 || parts[1].trim().equalsIgnoreCase("asc");
 
-        if (field.equals("price")) {
-            return asc ? product.price.asc() : product.price.desc();
-        } else {
-            throw new IllegalArgumentException("Invalid sort field: " + field);
-        }
+        return switch (field) {
+            case "price" -> asc ? product.price.asc() : product.price.desc();
+            case "id" -> asc ? product.id.asc() : product.id.desc();
+            default -> throw new BadRequestException();
+        };
     }
-
 
     private BooleanExpression categoryCondition(Long categoryId) {
-        if (categoryId == null || categoryId == -1L) return null;
+        if (categoryId == null) return null;
         return product.category.id.eq(categoryId);
-    }
-
-    private BooleanExpression isDeleted(boolean isDeleted) {
-        return product.isDeleted.eq(isDeleted);
-    }
-
-    private BooleanExpression betweenPrice(int min, int max) {
-        return product.price.between(min, max);
     }
 
 }

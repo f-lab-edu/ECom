@@ -12,6 +12,6 @@ public class ProductSearchDto {
     private Long id;
     private String productName;
     private Long price;
-    private String thumbnailUrl;
+    private Long stockQuantity;
     private String categoryName;
 }

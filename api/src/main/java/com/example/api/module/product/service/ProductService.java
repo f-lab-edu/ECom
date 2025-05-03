@@ -14,17 +14,22 @@ import com.example.core.domain.product_image.ProductImage;
 import com.example.core.domain.product_image.api.ProductImageApiRepository;
 import com.example.core.dto.ProductImageDto;
 import com.example.core.dto.ProductSearchConditionDto;
+import com.example.core.dto.ProductSearchDto;
 import com.example.core.exception.BadRequestException;
 import com.example.core.utils.MinioUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,9 +44,30 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<ProductsSearchResponse> getProducts(ProductSearchConditionRequest condition) {
-        ProductSearchConditionDto requestConditionDto = ProductSearchConditionRequest.toDto(condition);
-        return productApiRepository.search(requestConditionDto)
-                .map(ProductsSearchResponse::from);
+        Pageable pageable = PageRequest.of(condition.getPage(), condition.getSize());
+        ProductSearchConditionDto conditionDto = ProductSearchConditionRequest.toDto(condition);
+        List<ProductSearchDto> productSearchDtoList = productApiRepository.findProductsByCondition(conditionDto);
+
+        List<Long> productIds = productSearchDtoList.stream()
+                .map(ProductSearchDto::getId)
+                .toList();
+
+        Map<Long, String> thumbnailMap = productImageApiRepository.findThumbnailsByProductIds(productIds);
+
+        List<ProductsSearchResponse> responseList = productSearchDtoList.stream()
+                .map(dto -> new ProductsSearchResponse(
+                        dto.getId(),
+                        dto.getProductName(),
+                        dto.getPrice(),
+                        dto.getStockQuantity(),
+                        thumbnailMap.get(dto.getId()),
+                        dto.getCategoryName()
+                ))
+                .toList();
+
+        long totalCount = productApiRepository.countProductsByCondition(conditionDto);
+
+        return new PageImpl<>(responseList, pageable, totalCount);
     }
 
     @Transactional(readOnly = true)
@@ -54,8 +80,7 @@ public class ProductService {
     @Transactional
     public ImageUploadResponse uploadImage(MultipartFile file) {
         try {
-            ImageUploadResponse result = ImageUploadResponse.from(minioUtil.upload(file, "products"));
-            return result;
+            return ImageUploadResponse.from(minioUtil.upload(file, "products"));
 
         } catch (Exception e) {
             log.error("Image upload failed", e);
