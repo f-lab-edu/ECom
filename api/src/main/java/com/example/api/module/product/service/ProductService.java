@@ -93,19 +93,23 @@ public class ProductService {
         Category category = categoryApiRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new BadRequestException("Category not found"));
 
+        List<ProductImageDto> images = request.getProductImages();
+        String thumbnailUrl = images.get(0).getUrl();
+
         // create product
         Product product = Product.builder()
                 .productName(request.getName())
                 .description(request.getDescription())
                 .stockQuantity(request.getStockQuantity())
                 .price(request.getPrice())
+                .thumbnailUrl(thumbnailUrl)
                 .category(category)
                 .isDeleted(false)
                 .build();
         productApiRepository.save(product);
 
         // create product images
-        List<ProductImageDto> images = request.getProductImages();
+
         List<ProductImage> productImages = ProductImage.from(images, product);
         productImageApiRepository.saveAll(productImages);
 
