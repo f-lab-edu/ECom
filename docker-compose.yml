@@ -14,6 +14,7 @@ services:
       MYSQL_DATABASE: ecom_db
       MYSQL_USER: ecom_user
       MYSQL_PASSWORD: ecom_password
+
   redis:
     image: redis:latest
     container_name: ecom_redis_container
@@ -23,6 +24,20 @@ services:
       - ./redis:/data
       - ./redis/conf/redis.conf:/usr/local/conf/redis.conf
     command: redis-server /usr/local/conf/redis.conf
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+        - "9000:9000" # API 요청을 보낼 때 쓰는 포트 (AmazonS3Client가 여기에 요청함)
+        - "9001:9001" # 	http://localhost:9001 에서 웹 UI로 버킷 만들거나 파일 업로드 가능
+    volumes:
+      - ./minio/data:/data
+    environment:
+        MINIO_ROOT_USER: minioadmin # AWS S3의 Access Key / Secret Key와 같은 역할
+        MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001" # 	데이터 저장 경로 설정 및 웹 콘솔 포트 지정
+
 
 
 volumes:
