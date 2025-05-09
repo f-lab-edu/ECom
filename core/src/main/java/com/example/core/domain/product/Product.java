@@ -42,6 +42,9 @@ public class Product extends BaseEntity {
     @Builder.Default
     private List<ProductImage> productImages = new ArrayList<>();
 
+    @Column
+    private String thumbnailUrl;
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
