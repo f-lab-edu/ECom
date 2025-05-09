@@ -20,17 +20,4 @@ public class Cart extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private User user;
-
-    public static Cart of(Long userId) {
-        return Cart.builder()
-                   .userId(userId)
-                   .build();
-    }
 }

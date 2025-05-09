@@ -39,16 +39,16 @@ public class AuthService {
     @Transactional
     public AuthResponse signup(SignupRequestBody body) {
         if (userApiRepository.existsUserByEmail(body.getEmail())) {
-            throw new BadRequestException(messageUtil.getMessage("auth.email.DUPLICATE"));
+            throw new BadRequestException(messageUtil.getMessage("auth.user.email.DUPLICATE"));
         }
 
         String salt = saltedHashUtil.generateSalt();
         String hashedPassword = saltedHashUtil.hashPassword(body.getPassword(), salt);
 
-        User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber());
+        Cart cart = cartApiRepository.save(new Cart());
 
-        userApiRepository.save(user);
-        cartApiRepository.save(Cart.of(user.getId()));
+        User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber(), cart);
+        user = userApiRepository.save(user);
 
         return AuthResponse.from(user);
     }
@@ -66,7 +66,7 @@ public class AuthService {
 
         // if password is incorrect
         if (!saltedHashUtil.verifyPassword(body.getPassword(), user.getSalt(), user.getHashedPassword())) {
-            throw new BadRequestException(messageUtil.getMessage("auth.password.INCORRECT"));
+            throw new BadRequestException(messageUtil.getMessage("auth.user.password.INCORRECT"));
         }
 
         Long userId = user.getId();

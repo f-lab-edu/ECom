@@ -1,16 +1,32 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/ecom_db?serverTimezone=UTC&characterEncoding=UTF-8
-    username: ecom_user
-    password: ecom_password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
   jpa:
     hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: true
+      ddl-auto: create-drop    # 시작 시 CREATE, 종료 시 DROP
+
+
+  cache:
+    type: redis
+
+  redis:
+    host: localhost
+    port: 6379
+
+cloud:
+  aws:
+    s3:
+      endpoint: http://localhost:9000   # MinIO API 주소
+      bucket: images                    # 위에서 만든 버킷 이름
+    credentials:
+      access-key: minioadmin            # MinIO Access Key
+      secret-key: minioadmin            # MinIO Secret Key
+    region:
+      static: us-east-1                 # AWS region처럼 지정 (MinIO는 의미 없음)
+    stack:
+      auto: false                       # CloudFormation 관련 설정, 꺼도 무방
 
 jwt:
   token:

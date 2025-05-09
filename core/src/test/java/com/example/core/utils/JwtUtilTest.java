@@ -49,7 +49,7 @@ class JwtUtilTest {
         Claims claims = jwtUtil.extractAccessClaims(accessToken);
 
         //Then
-        assertEquals(userEmail, claims.getSubject());
+        assertEquals("AccessToken", claims.getSubject());
         assertEquals(userId, claims.get("userId", Long.class));
         assertEquals(roles, claims.get("roles", List.class));
         assertEquals("access", claims.get("type"));
@@ -64,7 +64,7 @@ class JwtUtilTest {
         Claims claims = jwtUtil.extractRefreshClaims(refreshToken);
 
         //Then
-        assertEquals(userEmail, claims.getSubject());
+        assertEquals("RefreshToken", claims.getSubject());
         assertEquals(userId, claims.get("userId", Long.class));
         assertEquals(roles, claims.get("roles", List.class));
         assertEquals("refresh", claims.get("type"));
