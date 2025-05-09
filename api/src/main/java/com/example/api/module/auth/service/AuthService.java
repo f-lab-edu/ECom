@@ -48,7 +48,9 @@ public class AuthService {
         Cart cart = cartApiRepository.save(new Cart());
 
         User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber(), cart);
-        user = userApiRepository.save(user);
+        cart.setUser(user);
+        userApiRepository.save(user);
+
 
         return AuthResponse.from(user);
     }

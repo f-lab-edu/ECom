@@ -1,17 +1,11 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.3'
+//	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'flab'
 version = '0.0.1-SNAPSHOT'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
 
 configurations {
 	compileOnly {
@@ -95,6 +89,5 @@ subprojects {
 
 		// 테스트용 H2
 		testImplementation 'com.h2database:h2'
-
 	}
 }
