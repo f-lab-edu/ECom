@@ -41,6 +41,8 @@ public class ProductApiRepositoryImpl implements ProductApiRepositoryCustom{
                 .from(product)
                 .where(buildWhere(conditionDto))
                 .orderBy(toOrderSpecifier(conditionDto.getSort()))
+                .offset(conditionDto.getPage() * conditionDto.getSize())
+                .limit(conditionDto.getSize())
                 .fetch();
     }
 
