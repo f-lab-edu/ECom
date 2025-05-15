@@ -15,6 +15,8 @@ import com.example.core.dto.ProductSummaryDto;
 import com.example.core.enums.CartProductStatus;
 import com.example.core.exception.BadRequestException;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class CartService {
     private final ProductApiRepository productApiRepository;
     private final CartProductApiRepository cartProductApiRepository;
 
+    @Cacheable(value = "cart", key = "#userId")
     @Transactional(readOnly = true)
     public CartSummaryResponse getCart(Long userId) {
         User user = userApiRepository.findById(userId)
@@ -37,6 +40,7 @@ public class CartService {
         return getCartSummary(user);
     }
 
+    @CacheEvict(value = "cart", key = "#userId")
     @Transactional
     public CartSummaryResponse addCartProduct(Long userId, CartProductAddRequest req) {
         User user = userApiRepository.findById(userId)
@@ -64,6 +68,7 @@ public class CartService {
         return getCartSummary(user);
     }
 
+    @CacheEvict(value = "cart", key = "#userId")
     @Transactional
     public CartSummaryResponse updateCartProductQuantity(Long userId, Long productId, CartProductQuantityUpdateRequest req) {
         User user = userApiRepository.findById(userId)
@@ -84,6 +89,7 @@ public class CartService {
         return getCartSummary(user);
     }
 
+    @CacheEvict(value = "cart", key = "#userId")
     @Transactional
     public CartSummaryResponse deleteCartProduct(Long userId, Long productId) {
         User user = userApiRepository.findById(userId)
