@@ -2,6 +2,7 @@ package com.example.core.domain.product;
 
 import com.example.core.domain.BaseEntity;
 import com.example.core.domain.category.Category;
+import com.example.core.domain.order_product.OrderProduct;
 import com.example.core.domain.product_image.ProductImage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,6 +42,10 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product")
     @Builder.Default
     private List<ProductImage> productImages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    @Builder.Default
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Column
     private String thumbnailUrl;
