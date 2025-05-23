@@ -112,33 +112,35 @@ public class CartService {
         List<CartProductDto> cartProductDtoList = new ArrayList<>();
 
         for (CartProduct cartProduct : cartProductList) {
-            Product product = cartProduct.getProduct();
-            ProductSummaryDto productSummaryDto;
-            Long quantity = 0L;
-            CartProductStatus status;
+            CartProductDto dto;
 
-            if (product == null || product.isDeleted()) {
-                status = CartProductStatus.DELETED;
-                productSummaryDto = null;
+            // 💡 블록 안에서 DTO 생성
+            {
+                Product product = cartProduct.getProduct();
+                ProductSummaryDto productSummaryDto;
+                Long quantity = 0L;
+                CartProductStatus status;
 
-            } else if (product.getStockQuantity() < cartProduct.getQuantity()) {
-                status = CartProductStatus.SHORTAGE;
-                productSummaryDto = ProductSummaryDto.of(product);
-                quantity = product.getStockQuantity();
+                if (product == null || product.isDeleted()) {
+                    status = CartProductStatus.DELETED;
+                    productSummaryDto = null;
 
-            } else {
-                status = CartProductStatus.AVAILABLE;
-                productSummaryDto = ProductSummaryDto.of(product);
-                quantity = cartProduct.getQuantity();
+                } else if (product.getStockQuantity() < cartProduct.getQuantity()) {
+                    status = CartProductStatus.SHORTAGE;
+                    productSummaryDto = ProductSummaryDto.from(product);
+                    quantity = product.getStockQuantity();
+
+                } else {
+                    status = CartProductStatus.AVAILABLE;
+                    productSummaryDto = ProductSummaryDto.from(product);
+                    quantity = cartProduct.getQuantity();
+                }
+                Long totalPrice = (productSummaryDto != null) ? productSummaryDto.getPrice() * cartProduct.getQuantity() : 0;
+
+                dto = new CartProductDto(productSummaryDto, quantity, status, totalPrice);
             }
-            Long totalPrice = (productSummaryDto != null) ? productSummaryDto.getPrice() * cartProduct.getQuantity() : 0;
 
-            cartProductDtoList.add(new CartProductDto(
-                    productSummaryDto,
-                    quantity,
-                    status,
-                    totalPrice
-            ));
+            cartProductDtoList.add(dto);
         }
         return CartSummaryResponse.of(cartProductDtoList);
     }
