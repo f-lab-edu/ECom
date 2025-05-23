@@ -2,13 +2,13 @@ package com.example.core.domain.user;
 
 import com.example.core.domain.BaseEntity;
 import com.example.core.domain.cart.Cart;
+import com.example.core.domain.order.Order;
 import com.example.core.domain.shipping_address.ShippingAddress;
 import com.example.core.domain.user.meta.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -50,6 +50,10 @@ public class User extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false, unique = true)
     private Cart cart;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
+
 
 
     public static User of(String email,
