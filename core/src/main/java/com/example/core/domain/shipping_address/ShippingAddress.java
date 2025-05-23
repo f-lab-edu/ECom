@@ -1,11 +1,12 @@
 package com.example.core.domain.shipping_address;
 
+import com.example.core.domain.order.Order;
 import com.example.core.domain.user.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 @Entity
@@ -13,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShippingAddress {
 
     @Id
@@ -22,7 +26,7 @@ public class ShippingAddress {
     @Column(nullable = false, length = 100)
     private String recipientName;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String address;
 
     @Column(nullable = false, length = 20)
@@ -38,4 +42,21 @@ public class ShippingAddress {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(mappedBy = "shippingAddress")
+    private List<Order> orders;
+
+
+    public static ShippingAddress of(String recipientName,
+                                      String address,
+                                      String zipCode,
+                                      String phoneNumber,
+                                      Boolean isDefault) {
+        return ShippingAddress.builder()
+                .recipientName(recipientName)
+                .address(address)
+                .zipCode(zipCode)
+                .phoneNumber(phoneNumber)
+                .isDefault(isDefault)
+                .build();
+    }
 }
