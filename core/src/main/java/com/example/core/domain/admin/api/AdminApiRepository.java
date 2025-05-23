@@ -11,6 +11,4 @@ import java.util.Optional;
 
 public interface AdminApiRepository extends JpaRepository<Admin, Long>, AdminApiRepositoryCustom{
     Optional<Admin> findByEmail(String email);
-
-
 }
