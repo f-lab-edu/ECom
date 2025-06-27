@@ -42,9 +42,6 @@ public class ShippingAddress {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "shippingAddress")
-    private List<Order> orders;
-
 
     public static ShippingAddress of(String recipientName,
                                       String address,
