@@ -79,6 +79,8 @@ subprojects {
 		// Redis Cache
 		implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 		implementation 'org.springframework.boot:spring-boot-starter-cache'
+		// Redisson - Redis Client
+		implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
 
 		// AWS SDK - S3
 		implementation platform('software.amazon.awssdk:bom:2.21.1') // 최신 BOM 사용

@@ -1,7 +1,7 @@
 package com.example.core.dto;
 
 import com.example.core.domain.cart_product.CartProduct;
-import com.example.core.enums.PaymentMehtod;
+import com.example.core.enums.PaymentMethod;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,9 +12,9 @@ public class CartProductPaymentRequestDto {
     private Long cartId;
     private Long productId;
     private Long quantity;
-    private PaymentMehtod paymentMethod;
+    private PaymentMethod paymentMethod;
 
-    public static CartProductPaymentRequestDto of(Long userId, CartProduct cartProduct, PaymentMehtod paymentMethod) {
+    public static CartProductPaymentRequestDto of(Long userId, CartProduct cartProduct, PaymentMethod paymentMethod) {
         return CartProductPaymentRequestDto.builder()
                 .userId(userId)
                 .cartId(cartProduct.getCart().getId())

@@ -19,8 +19,8 @@ public class OrderDto {
     public static OrderDto from(Order order) {
         return OrderDto.builder()
                 .orderId(order.getId())
-                .shippingAddressResponseDto(ShippingAddressResponseDto.from(order.getShippingAddress()))
-                .paymentId(order.getPayment() != null ? order.getPayment().getId() : null)
+                .shippingAddressResponseDto(ShippingAddressResponseDto.from(order))
+                .paymentId(order.getPayment().getId())
                 .status(order.getStatus())
                 .build();
     }
