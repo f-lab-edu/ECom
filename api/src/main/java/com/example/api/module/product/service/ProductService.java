@@ -97,15 +97,14 @@ public class ProductService {
         String thumbnailUrl = images.get(0).getUrl();
 
         // create product
-        Product product = Product.builder()
-                .productName(request.getName())
-                .description(request.getDescription())
-                .stockQuantity(request.getStockQuantity())
-                .price(request.getPrice())
-                .thumbnailUrl(thumbnailUrl)
-                .category(category)
-                .isDeleted(false)
-                .build();
+        Product product = Product.of(
+                request.getName(),
+                request.getDescription(),
+                request.getStockQuantity(),
+                request.getPrice(),
+                thumbnailUrl,
+                category
+        );
         productApiRepository.save(product);
 
         // create product images
