@@ -47,7 +47,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<ShippingAddress> shippingAddressList;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false, unique = true)
     private Cart cart;
 
