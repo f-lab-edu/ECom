@@ -13,13 +13,13 @@ import java.util.List;
 @Builder
 public class OrderProductResponse {
     Long userId;
-    List<OrderDto> orderDtos;
+    OrderDto orderDto;
     List<OrderProductDto> orderProductDtos;
 
-    public static OrderProductResponse of(Long userId, List<Order> orders, List<OrderProduct> orderProducts) {
+    public static OrderProductResponse of(Long userId, Order order, List<OrderProduct> orderProducts) {
         return OrderProductResponse.builder()
                 .userId(userId)
-                .orderDtos(OrderDto.from(orders))
+                .orderDto(OrderDto.from(order))
                 .orderProductDtos(OrderProductDto.from(orderProducts))
                 .build();
     }
