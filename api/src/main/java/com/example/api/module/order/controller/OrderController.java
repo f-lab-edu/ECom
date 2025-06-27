@@ -25,13 +25,6 @@ public class OrderController {
         return DataResponse.of(orderService.orderProduct(userId, req));
     }
 
-    @PostMapping("/cart")
-    public DataResponse<OrderProductResponse> orderProductFromCart(
-            @AuthenticationPrincipal Long userId,
-            @RequestBody OrderProductRequest req) {
-        return DataResponse.of(orderService.orderProductsFromCart(userId, req));
-    }
-
     @GetMapping()
     public DataResponse<List<OrderProductResponse>> getOrders(
             @AuthenticationPrincipal Long userId) {
