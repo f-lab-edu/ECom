@@ -42,11 +42,6 @@ ECom은 현대적인 마이크로서비스 아키텍처를 기반으로 구축�
 - **Containerization**: Docker, Docker Compose
 - **Testing**: JUnit 5, Spring Boot Test, H2 (Test DB)
 
-### Additional Libraries
-- **JSON Processing**: Gson
-- **File Handling**: Commons-IO 2.15.0
-- **Code Generation**: Lombok
-
 ## 🏛️ 아키텍처
 
 ```mermaid
