@@ -146,7 +146,7 @@ ECom/
 
 1. **저장소 클론**
 ```bash
-git clone https://github.com/your-repo/ECom.git
+git clone https://github.com/f-lab-edu/ECom.git
 cd ECom
 ```
 
