@@ -2,6 +2,7 @@ package com.example.core.domain.product;
 
 import com.example.core.domain.BaseEntity;
 import com.example.core.domain.category.Category;
+import com.example.core.domain.order_product.OrderProduct;
 import com.example.core.domain.product_image.ProductImage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,6 +43,10 @@ public class Product extends BaseEntity {
     @Builder.Default
     private List<ProductImage> productImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product")
+    @Builder.Default
+    private List<OrderProduct> orderProducts = new ArrayList<>();
+
     @Column
     private String thumbnailUrl;
 
@@ -55,4 +60,19 @@ public class Product extends BaseEntity {
     @Column
     private LocalDateTime deletedAt;
 
+    public static Product of(String productName, String description, Long stockQuantity, Long price, String thumbnailUrl, Category category) {
+        return Product.builder()
+                .productName(productName)
+                .description(description)
+                .stockQuantity(stockQuantity)
+                .price(price)
+                .thumbnailUrl(thumbnailUrl)
+                .category(category)
+                .isDeleted(false)
+                .build();
+    }
+
+    public void decreaseStock(Long quantity) {
+        stockQuantity -= quantity;
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.core.domain.cart_product;
 
+import com.example.core.domain.BaseEntity;
 import com.example.core.domain.cart.Cart;
 import com.example.core.domain.product.Product;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CartProduct {
+public class CartProduct extends BaseEntity {
 
     @EmbeddedId
     private CartProductId id;
