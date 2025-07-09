@@ -77,7 +77,8 @@ public class OrderService {
         Order order = orderTransactionService.createOrder(userId, req);
 
         // 주문 상품 생성 및 재고 확인 & 예약 처리
-        List<long[]> rollbackList = new ArrayList<>(); // productId, quantity / couponId, -1
+        List<Long> productRollbackList = new ArrayList<>(); // productId, quantity / couponId, -1
+        List<Long> couponRollbackList = new ArrayList<>(); // couponId
         try {
             // 상품 재고 예약 처리
             for (OrderProductRequestDto dto : req.getOrderProductDtos()) {
@@ -86,7 +87,7 @@ public class OrderService {
                 if (!reserved) {
                     throw new BadRequestException("stock not enough for product: " + productId);
                 }
-                rollbackList.add(new long[]{productId, productQuantity});
+                productRollbackList.add(productId);
             }
             log.info("successfully reserved stock for order: {}", order.getId());
 
@@ -98,7 +99,7 @@ public class OrderService {
                 if (!couponReserved) {
                     throw new BadRequestException("coupon not available or already used");
                 }
-                rollbackList.add(new long[]{couponId, -1});
+                couponRollbackList.add(couponId);
             }
             log.info("successfully reserved coupon for order: {}", order.getId());
 
@@ -114,7 +115,8 @@ public class OrderService {
             log.error("CRITICAL ORDER FAILURE - OrderId: {}. Full stack trace:", order.getId(), e);
             order.setStatus(OrderStatus.CANCELLED);
             // 재고 부족으로 주문 실패 시, 재고, 쿠폰 복구 (내부적으로 3회 재시도)
-            rollBackStock(order.getId(), rollbackList);
+            rollbackStock(order.getId(), productRollbackList);
+            rollbackCoupon(order.getId(), couponRollbackList);
             throw new BadRequestException("order failed: " + e.getMessage());
         }
     }
@@ -123,13 +125,14 @@ public class OrderService {
      * 재고 롤백 메소드
      * @param rollbackList 롤백할 목록 (productId, quantity / couponId, -1)
      */
-    private void rollBackStock(Long orderId, List<long[]> rollbackList) {
-        for (long[] rollback : rollbackList) {
-            if (rollback[1] == -1) {
-                couponService.revertReservation(orderId, rollback[0]);
-            } else {
-                stockService.revertReservation(orderId, rollback[0]);
-            }
+    private void rollbackStock(Long orderId, List<Long> rollbackList) {
+        for (Long productId : rollbackList) {
+            stockService.revertReservation(orderId, productId);
+        }
+    }
+    private void rollbackCoupon(Long orderId, List<Long> couponList) {
+        for (Long couponId : couponList) {
+            couponService.revertReservation(orderId, couponId);
         }
     }
 }
