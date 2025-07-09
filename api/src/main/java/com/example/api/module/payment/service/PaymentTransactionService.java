@@ -19,7 +19,7 @@ public class PaymentTransactionService {
     private final OrderApiRepository orderApiRepository;
     private final PaymentApiRepository paymentApiRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Order checkOrderForPayment(Long orderId, Long userId) {
         Order order = orderApiRepository.findByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new BadRequestException("주문을 찾을 수 없거나 소유자가 아닙니다."));
