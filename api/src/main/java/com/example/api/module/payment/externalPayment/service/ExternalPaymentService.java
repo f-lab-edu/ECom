@@ -1,8 +1,8 @@
 package com.example.api.module.payment.externalPayment.service;
 
-import com.example.core.enums.PaymentMehtod;
+import com.example.core.dto.PaymentRequestDto;
 
 public interface ExternalPaymentService {
 
-    public boolean sendPaymentRequestIsSuccess(PaymentMehtod paymentMethod, Long paymentAmount);
+    public String sendPaymentRequestIsSuccess(PaymentRequestDto dto);
 }

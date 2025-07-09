@@ -1,6 +1,6 @@
 package com.example.core.dto;
 
-import com.example.core.enums.PaymentMehtod;
+import com.example.core.enums.PaymentMethod;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,9 +10,9 @@ public class ProductPaymentRequestDto {
     private Long userId;
     private Long productId;
     private Long quantity;
-    private PaymentMehtod paymentMethod;
+    private PaymentMethod paymentMethod;
 
-    public static ProductPaymentRequestDto of(Long userId, Long productId, Long quantity, PaymentMehtod paymentMethod) {
+    public static ProductPaymentRequestDto of(Long userId, Long productId, Long quantity, PaymentMethod paymentMethod) {
         return ProductPaymentRequestDto.builder()
                 .userId(userId)
                 .productId(productId)

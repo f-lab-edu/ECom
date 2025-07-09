@@ -2,7 +2,8 @@ package com.example.core.domain.payment;
 
 import com.example.core.domain.BaseEntity;
 import com.example.core.domain.order.Order;
-import com.example.core.enums.PaymentMehtod;
+import com.example.core.dto.PaymentRequestDto;
+import com.example.core.enums.PaymentMethod;
 import com.example.core.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,7 +24,8 @@ public class Payment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @Enumerated(EnumType.STRING)
@@ -32,16 +34,28 @@ public class Payment extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column
-    private PaymentMehtod paymentMethod;
+    private PaymentMethod paymentMethod;
+
+    @Column
+    private String cardNumber;
+
+    @Column
+    private String transactionId;
 
     @Column
     private Long paymentAmount;
 
-    public static Payment createPayment(PaymentMehtod paymentMethod, Long paymentAmount, PaymentStatus paymentStatus) {
+    public static Payment create(Order order, PaymentRequestDto paymentRequestDto) {
         return Payment.builder()
-                .paymentStatus(paymentStatus)
-                .paymentMethod(paymentMethod)
-                .paymentAmount(paymentAmount)
+                .order(order)
+                .paymentStatus(PaymentStatus.PENDING)
+                .paymentMethod(paymentRequestDto.getPaymentMethod())
+                .cardNumber(paymentRequestDto.getCardNumber())
+                .paymentAmount(paymentRequestDto.getPaymentAmount())
                 .build();
+    }
+
+    public void setStatus(PaymentStatus status) {
+        this.paymentStatus = status;
     }
 }

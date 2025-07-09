@@ -1,5 +1,6 @@
 package com.example.core.dto;
 
+import com.example.core.domain.order.Order;
 import com.example.core.domain.shipping_address.ShippingAddress;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,21 +12,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShippingAddressResponseDto {
-    private Long shippingAddressId;
     private String recipientName;
     private String address;
     private String zipCode;
     private String phoneNumber;
-    private Boolean isDefault;
 
-    public static ShippingAddressResponseDto from(ShippingAddress shippingAddress) {
+    public static ShippingAddressResponseDto from(Order order) {
         return ShippingAddressResponseDto.builder()
-                .shippingAddressId(shippingAddress.getId())
-                .recipientName(shippingAddress.getRecipientName())
-                .address(shippingAddress.getAddress())
-                .zipCode(shippingAddress.getZipCode())
-                .phoneNumber(shippingAddress.getPhoneNumber())
-                .isDefault(shippingAddress.getIsDefault())
+                .recipientName(order.getRecipientName())
+                .address(order.getAddress())
+                .zipCode(order.getZipCode())
+                .phoneNumber(order.getPhoneNumber())
                 .build();
     }
 }

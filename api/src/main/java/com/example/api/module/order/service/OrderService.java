@@ -1,19 +1,13 @@
 package com.example.api.module.order.service;
 
-import com.example.api.module.cart.service.CartService;
+import com.example.api.module.coupon.service.CouponService;
 import com.example.api.module.order.controller.request.OrderProductRequest;
 import com.example.api.module.order.controller.response.OrderProductResponse;
-import com.example.core.domain.cart.Cart;
-import com.example.core.domain.cart_product.CartProduct;
-import com.example.core.domain.cart_product.api.CartProductApiRepository;
+import com.example.api.module.payment.service.PaymentService;
+import com.example.api.module.stock.service.StockService;
 import com.example.core.domain.order.Order;
 import com.example.core.domain.order.api.OrderApiRepository;
 import com.example.core.domain.order_product.OrderProduct;
-import com.example.core.domain.order_product.api.OrderProductApiRepository;
-import com.example.core.domain.payment.Payment;
-import com.example.core.domain.product.Product;
-import com.example.core.domain.product.api.ProductApiRepository;
-import com.example.core.domain.shipping_address.ShippingAddress;
 import com.example.core.domain.shipping_address.api.ShippingAddressApiRepository;
 import com.example.core.domain.user.User;
 import com.example.core.domain.user.api.UserApiRepository;
@@ -21,6 +15,7 @@ import com.example.core.dto.OrderProductRequestDto;
 import com.example.core.enums.OrderStatus;
 import com.example.core.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,16 +24,18 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class OrderService {
 
-    private final CartService cartService;
+    private final StockService stockService;
+    private final PaymentService paymentService;
+    private final OrderTransactionService orderTransactionService;
+    private final CouponService couponService;
 
     private final ShippingAddressApiRepository shippingAddressApiRepository;
-    private final ProductApiRepository productApiRepository;
     private final UserApiRepository userApiRepository;
     private final OrderApiRepository orderApiRepository;
-    private final OrderProductApiRepository orderProductApiRepository;
-    private final CartProductApiRepository cartProductApiRepository;
+
 
 
     @Transactional(readOnly = true)
@@ -58,7 +55,7 @@ public class OrderService {
         // 2. 주문 상품들 조회
         List<OrderProduct> orderProducts = order.getOrderProducts();
 
-        return OrderProductResponse.of(userId, List.of(order), orderProducts);
+        return OrderProductResponse.of(userId, order, orderProducts);
     }
 
     @Transactional(readOnly = true)
@@ -75,90 +72,67 @@ public class OrderService {
     }
 
     // Order a single product
-    @Transactional
     public OrderProductResponse orderProduct(Long userId, OrderProductRequest req) {
-        OrderProductRequestDto reqDto = req.getOrderProducts().get(0);
-        Long productId = reqDto.getProductId();
-
-        // 0. 유저 조회
-        User user = userApiRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException("user not found"));
-        // 1. 제품 조회
-        Long quantity = reqDto.getQuantity();
-        Product product = productApiRepository.findByIdAndIsDeletedFalse(productId)
-                .orElseThrow(() -> new BadRequestException("product not found"));
-
-        // 2. 제품 수량 확인
-        if (product.getStockQuantity() < quantity) {
-            throw new BadRequestException("not enough quantity");
-        }
-
-        // 3. 주문 배송지 조회
-        Long shippingAddressId = req.getShippingAddressId();
-        ShippingAddress shippingAddress = shippingAddressApiRepository.findByIdAndUserId(shippingAddressId, userId)
-                .orElseThrow(() -> new BadRequestException("shipping address not found"));
-
-        // 4. 제품 수량 차감
-        product.setStockQuantity(product.getStockQuantity() - quantity);
-
-        // 5. 주문 생성
-        Order order = Order.createOrder(user, shippingAddress, null);
-        orderApiRepository.save(order);
-        // 6. 주문 상품들 생성
-        OrderProduct orderProduct = OrderProduct.createOrderProduct(order, product, quantity, product.getPrice());
-        orderProductApiRepository.save(orderProduct);
-
-        return OrderProductResponse.of(userId, List.of(order), List.of(orderProduct));
-    }
-
-    // Order products from carts
-    @Transactional
-    public OrderProductResponse orderProductsFromCart(Long userId, OrderProductRequest req) {
-        List<OrderProductRequestDto> reqDtos = req.getOrderProducts();
-        Long shippingAddressId = req.getShippingAddressId();
-
-        User user = userApiRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException("user not found"));
-        Cart cart = user.getCart();
-
-        // 배송지 확인
-        ShippingAddress shippingAddress = shippingAddressApiRepository.findByIdAndUserId(shippingAddressId, userId)
-                .orElseThrow(() -> new BadRequestException("shipping address not found"));
-
         // 주문 생성
-        Order order = Order.createOrder(user, shippingAddress, null);
-        List<OrderProduct> orderProducts = new ArrayList<>();
-        for (OrderProductRequestDto reqDto : reqDtos) {
-            Long productId = reqDto.getProductId();
+        Order order = orderTransactionService.createOrder(userId, req);
 
-            // 제품 조회
-            CartProduct cartProduct = cartProductApiRepository.findByCart_IdAndProduct_Id(cart.getId(), productId)
-                    .orElseThrow(() -> new BadRequestException("cart product not found"));
-            Long cartProductQuantity = cartProduct.getQuantity();
-
-            Product product = productApiRepository.findByIdAndIsDeletedFalse(productId)
-                    .orElseThrow(() -> new BadRequestException("product not found"));
-            // 제품 수량 확인
-            if (product.getStockQuantity() < cartProductQuantity) {
-                throw new BadRequestException("not enough quantity");
+        // 주문 상품 생성 및 재고 확인 & 예약 처리
+        List<Long> productRollbackList = new ArrayList<>(); // productId, quantity / couponId, -1
+        List<Long> couponRollbackList = new ArrayList<>(); // couponId
+        try {
+            // 상품 재고 예약 처리
+            for (OrderProductRequestDto dto : req.getOrderProductDtos()) {
+                long productId = dto.getProductId(), productQuantity = dto.getQuantity();
+                boolean reserved = stockService.tryReserve(order.getId(), productId, productQuantity);
+                if (!reserved) {
+                    throw new BadRequestException("stock not enough for product: " + productId);
+                }
+                productRollbackList.add(productId);
             }
+            log.info("successfully reserved stock for order: {}", order.getId());
 
-            // 제품 수량 차감
-            product.setStockQuantity(product.getStockQuantity() - cartProductQuantity);
-            cartService.deleteCartProduct(cart.getId(), productId);
 
-            // 주문 상품 생성
-            OrderProduct orderProduct = OrderProduct.createOrderProduct(order, product, cartProductQuantity, product.getPrice());
-            orderProducts.add(orderProduct);
+            // 쿠폰 적용 확인 & 예약 처리
+            Long couponId = req.getCouponId();
+            if (couponId != null) {
+                boolean couponReserved = couponService.tryReserve(userId, order.getId(), req.getCouponId());
+                if (!couponReserved) {
+                    throw new BadRequestException("coupon not available or already used");
+                }
+                couponRollbackList.add(couponId);
+            }
+            log.info("successfully reserved coupon for order: {}", order.getId());
+
+            // 결제 시도
+            String transactionId = paymentService.processPayment(userId, order.getId(), req.getPaymentRequestDto());
+            log.info("successfully payment for order: {}", order.getId());
+
+            // 결제 후  확정 단계, 쿠폰 확정
+            orderTransactionService.finalizeOrderSuccess(order.getId(), req);
+            return OrderProductResponse.of(userId, order, order.getOrderProducts());
+
+        } catch (Exception e) {
+            log.error("CRITICAL ORDER FAILURE - OrderId: {}. Full stack trace:", order.getId(), e);
+            order.setStatus(OrderStatus.CANCELLED);
+            // 재고 부족으로 주문 실패 시, 재고, 쿠폰 복구 (내부적으로 3회 재시도)
+            rollbackStock(order.getId(), productRollbackList);
+            rollbackCoupon(order.getId(), couponRollbackList);
+            throw new BadRequestException("order failed: " + e.getMessage());
         }
-
-        orderApiRepository.save(order);
-        orderProductApiRepository.saveAll(orderProducts);
-        
-        return OrderProductResponse.of(userId, List.of(order), orderProducts);
     }
 
-
-
-
+    /**
+     * 재고 롤백 메소드
+     * @param rollbackList 롤백할 목록 (productId, quantity / couponId, -1)
+     */
+    private void rollbackStock(Long orderId, List<Long> rollbackList) {
+        for (Long productId : rollbackList) {
+            stockService.revertReservation(orderId, productId);
+        }
+    }
+    private void rollbackCoupon(Long orderId, List<Long> couponList) {
+        for (Long couponId : couponList) {
+            couponService.revertReservation(orderId, couponId);
+        }
+    }
 }
