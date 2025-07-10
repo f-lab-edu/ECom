@@ -38,8 +38,9 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "order")
-    private List<OrderProduct> orderProducts;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
     // 주문 시점의 정보를 복사해서 저장
     @Column(nullable = false, length = 100)
@@ -66,10 +67,7 @@ public class Order extends BaseEntity {
     }
 
     public void addOrderProduct(OrderProduct orderProduct) {
-        if (this.orderProducts == null) {
-            this.orderProducts = new ArrayList<>();
-        }
-        this.orderProducts.add(orderProduct);
-        orderProduct.setOrder(this); // 양방향 관계를 한번에 설정
+        orderProducts.add(orderProduct);
+        orderProduct.setOrder(this);
     }
 }

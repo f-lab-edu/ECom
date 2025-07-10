@@ -113,7 +113,6 @@ public class ProductService {
         productImageApiRepository.saveAll(productImages);
 
         product.setProductImages(productImages);
-        productApiRepository.save(product);
         return product.getId();
     }
 

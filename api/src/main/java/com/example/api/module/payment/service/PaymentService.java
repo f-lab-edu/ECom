@@ -1,17 +1,15 @@
 package com.example.api.module.payment.service;
 
+import org.springframework.stereotype.Service;
+
 import com.example.api.module.payment.externalPayment.service.ExternalPaymentService;
-import com.example.api.module.shipping.service.ShippingService;
 import com.example.core.domain.order.Order;
-import com.example.core.domain.order.api.OrderApiRepository;
 import com.example.core.domain.payment.Payment;
-import com.example.core.domain.payment.api.PaymentApiRepository;
-import com.example.core.dto.PaymentDto;
 import com.example.core.dto.PaymentRequestDto;
 import com.example.core.enums.PaymentStatus;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

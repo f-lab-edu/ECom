@@ -1,15 +1,32 @@
 package com.example.core.domain.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.core.domain.BaseEntity;
 import com.example.core.domain.cart.Cart;
 import com.example.core.domain.order.Order;
 import com.example.core.domain.shipping_address.ShippingAddress;
 import com.example.core.domain.user.meta.Status;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Entity
@@ -51,10 +68,16 @@ public class User extends BaseEntity {
     @JoinColumn(name = "cart_id", nullable = false, unique = true)
     private Cart cart;
 
-    @OneToMany(mappedBy = "user")
-    private List<Order> orders;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Order> orders = new ArrayList<>();
 
 
+
+    public void addOrder(Order order) {
+        orders.add(order);
+        order.setUser(this);
+    }
 
     public static User of(String email,
                           String nickname,
