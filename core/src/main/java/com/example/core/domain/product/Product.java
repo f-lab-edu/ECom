@@ -14,12 +14,12 @@ import java.util.List;
 
 @Slf4j
 @Entity
-@Table
+@Table(name = "product")
 @Getter
 @Setter
 @ToString
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends BaseEntity {
 

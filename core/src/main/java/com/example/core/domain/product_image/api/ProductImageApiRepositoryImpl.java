@@ -1,6 +1,5 @@
 package com.example.core.domain.product_image.api;
 
-import com.example.core.domain.product.api.ProductApiRepository;
 import com.example.core.domain.product_image.QProductImage;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
