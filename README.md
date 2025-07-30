@@ -210,25 +210,6 @@ docker-compose up -d
 | PUT | `/api/v1/shipping-address/{addressId}/default` | 기본 주소 설정 | ✅ |
 | DELETE | `/api/v1/shipping-address/{addressId}` | 배송주소 삭제 | ✅ |
 
-## 🗄️ 데이터베이스 ERD
-
-
-## 🔧 개발 가이드
-
-### 코딩 컨벤션
-
-- **Package Naming**: 도메인 중심 패키지 구조 (`module.{domain}.{layer}`)
-- **Class Naming**: PascalCase, 의미있는 이름 사용
-- **Method Naming**: camelCase, 동사+명사 조합
-- **Database**: snake_case 컬럼명, 복수형 테이블명
-
-### 보안 가이드
-
-- JWT 토큰 기반 인증/인가
-- 비밀번호 Salt + Hash 저장
-- CORS 설정으로 도메인 제한
-- SQL Injection 방지 (QueryDSL, JPA 활용)
-
 ### 성능 최적화
 
 - **캐싱**: Redis를 활용한 조회 성능 향상
