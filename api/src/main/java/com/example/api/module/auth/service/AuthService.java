@@ -1,28 +1,34 @@
 package com.example.api.module.auth.service;
 
-import com.example.api.module.auth.controller.request.LoginRequestBody;
-import com.example.api.module.auth.controller.request.SignupRequestBody;
-import com.example.core.domain.cart.Cart;
-import com.example.core.domain.cart.api.CartApiRepository;
-import com.example.core.domain.user.User;
-import com.example.core.domain.user.api.UserApiRepository;
-import com.example.core.domain.user.meta.Status;
-import com.example.core.exception.BadRequestException;
-import com.example.core.model.AuthResponse;
-import com.example.core.utils.JwtUtil;
-import com.example.core.utils.MessageUtil;
-import com.example.core.utils.SaltedHashUtil;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
+import com.example.api.module.auth.controller.request.LoginRequestBody;
+import com.example.api.module.auth.controller.request.SignupRequestBody;
+import com.example.core.domain.cart.Cart;
+import com.example.core.domain.cart.api.CartApiRepository;
+import com.example.core.domain.role.Role;
+import com.example.core.domain.role.api.RoleApiRepository;
+import com.example.core.domain.user.User;
+import com.example.core.domain.user.api.UserApiRepository;
+import com.example.core.domain.user.meta.Status;
+import com.example.core.domain.user_to_role.UserRole;
+import com.example.core.domain.user_to_role.api.UserRoleApiRepository;
+import com.example.core.exception.BadRequestException;
+import com.example.core.model.AuthResponse;
+import com.example.core.utils.JwtUtil;
+import com.example.core.utils.MessageUtil;
+import com.example.core.utils.SaltedHashUtil;
+
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -31,6 +37,8 @@ public class AuthService {
 
     private final UserApiRepository userApiRepository;
     private final CartApiRepository cartApiRepository;
+    private final RoleApiRepository roleApiRepository;
+    private final UserRoleApiRepository userRoleApiRepository;
 
     private final JwtUtil jwtUtil;
     private final MessageUtil messageUtil;
@@ -50,6 +58,13 @@ public class AuthService {
         User user = User.of(body.getEmail(), body.getNickname(), salt, hashedPassword, body.getPhoneNumber(), cart);
         cart.setUser(user);
         userApiRepository.save(user);
+
+        // 기본 사용자 역할 부여
+        Role userRole = roleApiRepository.findByDescription("ROLE_USER")
+                .orElseThrow(() -> new BadRequestException(messageUtil.getMessage("auth.role.NOTFOUND")));
+        
+        UserRole userRoleMapping = new UserRole(user, userRole);
+        userRoleApiRepository.save(userRoleMapping);
 
 
         return AuthResponse.from(user);
@@ -120,8 +135,11 @@ public class AuthService {
     }
 
 
-    // 임시로 ROLE_USER로 설정
-    private List<String> getUserRoles(Long userId) {
-        return List.of("ROLE_USER");
+    @Transactional(readOnly = true)
+    public List<String> getUserRoles(Long userId) {
+        List<Role> roles = userApiRepository.findRolesByUserId(userId);
+        return roles.stream()
+                .map(Role::getDescription)
+                .toList();
     }
 }

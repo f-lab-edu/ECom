@@ -8,6 +8,7 @@ import com.example.core.domain.cart.Cart;
 import com.example.core.domain.order.Order;
 import com.example.core.domain.shipping_address.ShippingAddress;
 import com.example.core.domain.user.meta.Status;
+import com.example.core.domain.user_to_role.UserRole;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -71,6 +72,10 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
+
+    @OneToMany
+    @JoinColumn(name = "user_id")
+    private List<UserRole> userRoles;
 
 
 
