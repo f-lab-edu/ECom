@@ -13,6 +13,7 @@ ECom은 현대적인 마이크로서비스 아키텍처를 기반으로 구축�
 ### 🎯 주요 기능
 
 - **사용자 관리**: JWT 기반 인증/인가 시스템
+- **RBAC 보안**: 역할 기반 접근 제어 (User, Admin, Super Admin)
 - **상품 관리**: 카테고리별 상품 관리, 이미지 업로드, 검색 및 필터링
 - **장바구니**: 실시간 장바구니 관리 및 세션 유지
 - **주문 처리**: 주문 생성, 결제 처리, 주문 추적
@@ -26,19 +27,20 @@ ECom은 현대적인 마이크로서비스 아키텍처를 기반으로 구축�
 - **Language**: Java 17
 - **Build Tool**: Gradle 8.x
 - **Authentication**: JWT (jjwt 0.11.5)
+- **Authorization**: RBAC (Role-Based Access Control)
 - **Query**: QueryDSL 5.0.0
 - **Validation**: Spring Boot Starter Validation
 
 ### Database & Cache
 - **Primary DB**: MySQL 8.0
-- **Cache**: Redis (Redisson 3.27.2)
+- **Cache**: Redis
 - **Connection Pool**: HikariCP
 
 ### File Storage
 - **Cloud**: AWS S3
 - **Local Development**: MinIO
 
-### DevOps & Infrastructure
+### Infrastructure
 - **Containerization**: Docker, Docker Compose
 - **Testing**: JUnit 5, Spring Boot Test, H2 (Test DB)
 
@@ -181,36 +183,73 @@ docker-compose up -d
 |--------|----------|-------------|---------------|
 | GET | `/api/v1/products` | 상품 검색 (카테고리, 가격, 정렬, 페이징) | ❌ |
 | GET | `/api/v1/products/{productId}` | 상품 상세 조회 | ❌ |
-| POST | `/api/v1/products/image` | 이미지 업로드 | ✅ (ADMIN) |
-| POST | `/api/v1/products` | 상품 생성 | ✅ (ADMIN) |
-| PUT | `/api/v1/products/{productId}` | 상품 수정 | ✅ (ADMIN) |
-| DELETE | `/api/v1/products/{productId}` | 상품 삭제 | ✅ (ADMIN) |
+| POST | `/api/v1/products/image` | 이미지 업로드 | ✅ (ADMIN/SUPER_ADMIN) |
+| POST | `/api/v1/products` | 상품 생성 | ✅ (ADMIN/SUPER_ADMIN) |
+| PUT | `/api/v1/products/{productId}` | 상품 수정 | ✅ (ADMIN/SUPER_ADMIN) |
+| DELETE | `/api/v1/products/{productId}` | 상품 삭제 | ✅ (ADMIN/SUPER_ADMIN) |
 
 ### 장바구니 (Cart)
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET | `/api/v1/cart` | 장바구니 조회 | ✅ |
-| POST | `/api/v1/cart/products` | 상품 추가 | ✅ |
-| PUT | `/api/v1/cart/products/{productId}` | 수량 수정 | ✅ |
-| DELETE | `/api/v1/cart/products/{productId}` | 상품 삭제 | ✅ |
+| GET | `/api/v1/cart` | 장바구니 조회 | ✅ (USER) |
+| POST | `/api/v1/cart/products` | 상품 추가 | ✅ (USER) |
+| PUT | `/api/v1/cart/products/{productId}` | 수량 수정 | ✅ (USER) |
+| DELETE | `/api/v1/cart/products/{productId}` | 상품 삭제 | ✅ (USER) |
 
 ### 주문 (Orders)
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/api/v1/order/product` | 상품 주문 | ✅ |
-| GET | `/api/v1/order` | 주문 목록 조회 | ✅ |
-| GET | `/api/v1/order/{orderId}` | 주문 상세 조회 | ✅ |
+| POST | `/api/v1/order/product` | 상품 주문 | ✅ (USER) |
+| GET | `/api/v1/order` | 주문 목록 조회 | ✅ (USER) |
+| GET | `/api/v1/order/{orderId}` | 주문 상세 조회 | ✅ (USER) |
 
 ### 배송주소 (Shipping Address)
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET | `/api/v1/shipping-address` | 배송주소 목록 | ✅ |
-| POST | `/api/v1/shipping-address` | 배송주소 생성 | ✅ |
-| PUT | `/api/v1/shipping-address/{addressId}` | 배송주소 수정 | ✅ |
-| PUT | `/api/v1/shipping-address/{addressId}/default` | 기본 주소 설정 | ✅ |
-| DELETE | `/api/v1/shipping-address/{addressId}` | 배송주소 삭제 | ✅ |
+| GET | `/api/v1/shipping-address` | 배송주소 목록 | ✅ (USER) |
+| POST | `/api/v1/shipping-address` | 배송주소 생성 | ✅ (USER) |
+| PUT | `/api/v1/shipping-address/{addressId}` | 배송주소 수정 | ✅ (USER) |
+| PUT | `/api/v1/shipping-address/{addressId}/default` | 기본 주소 설정 | ✅ (USER) |
+| DELETE | `/api/v1/shipping-address/{addressId}` | 배송주소 삭제 | ✅ (USER) |
+
+### 관리자 (Admin)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/admin/v1/auth/login` | 관리자 로그인 | ❌ |
+| POST | `/admin/v1/auth/refresh` | 토큰 갱신 | ❌ |
+| POST | `/admin/v1/auth/admins` | 관리자 생성 | ✅ (SUPER_ADMIN) |
+
+
+### 권한 요약
+
+| 기능 | USER | ADMIN | SUPER_ADMIN |
+|------|------|-------|-------------|
+| 회원가입/로그인 | ✅ | ✅ | ✅ |
+| 상품 조회 | ✅ | ✅ | ✅ |
+| 장바구니 관리 | ✅ | ❌ | ❌ |
+| 주문 생성/조회 | ✅ | ❌ | ❌ |
+| 배송주소 관리 | ✅ | ❌ | ❌ |
+| 상품 관리 (CRUD) | ❌ | ✅ | ✅ |
+| 관리자 생성 | ❌ | ❌ | ✅ |
+
+- **Method-Level Security**: `@PreAuthorize` 어노테이션 활용
+- **URL-Level Security**: Spring Security 필터 체인 활용
+- **JWT 통합**: 토큰에 역할 정보 포함
+- **자동 역할 할당**: 회원가입 시 `ROLE_USER` 자동 부여
 
 ### 성능 최적화
 
 - **캐싱**: Redis를 활용한 조회 성능 향상
 - **Pessimistic Lock**: 재고 관리 동시성 제어
+
+
+### 보안
+
+- **RBAC (Role-Based Access Control)**: 역할 기반 접근 제어 시스템
+  - `ROLE_USER`: 일반 사용자 권한 (장바구니, 주문, 배송주소 관리)
+  - `ROLE_ADMIN`: 관리자 권한 (상품 관리, 사용자 조회)
+  - `ROLE_SUPER_ADMIN`: 최고 관리자 권한 (관리자 생성, 전체 시스템 관리)
+- **JWT 인증**: 토큰 기반 인증/인가, 역할 정보 포함
+- **Method-Level Security**: `@PreAuthorize` 어노테이션을 통한 세밀한 권한 제어
+- **URL-Level Security**: Spring Security 설정을 통한 엔드포인트별 접근 제어
+- 비밀번호 Salt + Hash 저장
